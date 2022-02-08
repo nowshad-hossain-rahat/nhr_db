@@ -208,8 +208,7 @@
                     $q = "UPDATE $this->table_name SET $cols $conds";
                     $result = $this->conn->prepare($q);
                     $result->execute($params);
-                    return $result->rowCount();
-                    
+                    return $result->rowCount() ? $result->rowCount():false;
                 }
                 
                 
