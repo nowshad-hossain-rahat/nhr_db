@@ -1,0 +1,14 @@
+{
+    "name": "nowshad/nhr_db",
+    "description": "This is a PDO database handler library",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "nowshad-hossain-rahat",
+            "email": "nowshad.hossain.rahat@gmail.com"
+        }
+    ],
+    "minimum-stability": "stable",
+    "require": {}
+}
