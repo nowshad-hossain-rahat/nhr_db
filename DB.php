@@ -18,7 +18,7 @@
             $this->user = $info["user"];
             $this->pass = $info["pass"];
             $this->db = $info["dbname"];
-            $this->port = $info["port"];
+            $this->port = $info["port"] ? $info["port"]:"";
             $this->charset = $info["charset"];
             
             
