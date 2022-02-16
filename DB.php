@@ -13,13 +13,13 @@
         
         function __construct(array $info){
             
-            $this->driver = ($info["driver"]) ? $info["driver"]:"mysql";
-            $this->host = ($info["host"]) ? $info["host"]:"localhost";
+            $this->driver = isset($info["driver"]) ? $info["driver"]:"mysql";
+            $this->host = isset($info["host"]) ? $info["host"]:"localhost";
             $this->user = $info["user"];
             $this->pass = $info["pass"];
             $this->db = $info["dbname"];
-            $this->port = $info["port"] ? $info["port"]:"";
-            $this->charset = $info["charset"];
+            $this->port = isset($info["port"]) ? $info["port"]:"";
+            $this->charset = isset($info["charset"]) ? $info["charset"]:"";
             
             
             $this->connect();
