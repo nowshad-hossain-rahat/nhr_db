@@ -36,50 +36,61 @@ if($db->is_connected()){
 
 # To create a new table :
 
-$users = $db->new_table(TABLE_NAME_TO_CREATE);
+# creating table
+$table = $db->table( 'table_name' );
 
-// Now you have to add columns to this table.So to add columns :
+$table->col( 'int', DB::int(1), true )
+        ->col( 'varchar', DB::str(100) )
+        ->col( 'text', DB::text() )
+        ->col( 'float', DB::float() )
+        ->col( 'enum', DB::enum(['value1', 'value2']) )
+        ->col( 'date', DB::date() )
+        ->col( 'datetime', DB::datetime() );
+ 
+ $table->create();
 
-$users->col("YOUR_COLUMN_NAME",DATA_TYPE,PRIMARY_KEY,NOT_NULL,UNIQUE);
+// To add columns after creating the table, after calling the "create()" method
 
-// ** 1st and 2nd parameters are compulsary and others are optional.
-    
-// For DATA_TYPE :
-
->> $users->int(LENGTH);
->> $users->str(LENGTH);
->> $users->txt();
->> $users->dat();
->> $users->datime();
->> $users->bool();
-
-For PRIMARY_KEY = true/false (default : false)
-For NOT_NULL = true/false (default : false)
-For UNIQUE = true/false (default : false)
-
-
-// After adding columns you must call a function to create the table with these colums.
-
-$users->create():
-
-// To add columns after creating the table
-// I mean,after calling the "create()" method
-
-$users->add(ALL_THE_PARAMETERS_ARE_SAME_AS "col" FUNCTION);
+$table->add(ALL_THE_PARAMETERS_ARE_SAME_AS "col" FUNCTION);
 
 // To drop any table
-
-$users->drop("COLUMN_NAME");
+$table->drop("COLUMN_NAME");
 
 // To drop all the columns or to drop the whole TABLE_NAME
 
-$users->drop_all();
+$table->drop_all();
 
 // ** NOTE : col,add,drop,drop_all these methods
-// will return the "table object" $users in this case
-// so you can do method chaining like
+// will return the "table object" $table, so in this case so you can do method chaining like
 
-$users-col()->add->drop->drop_all();
+$table->col()->add->drop->drop_all();
 
+// to insert row into the table
+$table->insert([
+            'column_name' => 'value'
+        ]);
+        
+// to update row of the table
+$table->update([
+            'column_name' => 'value'
+       ],
+       [
+            // conditions
+            'id' => '0',
+            'ORDER_BY' => 'id desc',
+            'LIMIT' => '5'
+       ]);
 
+// to delete row
+$table->delete([
+            // conditions
+            'column_name' => 'value'
+        ]);
+        
+        
+// to fetch rows
+$table->fetch(['column_names_to_fetch'], [
+            // conditions
+            'column_name' => 'value'
+        ], /* return type */ DB::OBJ|DB::ASSOC|DB::IND);
 
