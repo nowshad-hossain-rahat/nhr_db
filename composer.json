@@ -10,7 +10,6 @@
             "email": "nowshad.hossain.rahat@gmail.com"
         }
     ],
-    "minimum-stability": "stable",
-    "prefer-stable": true,
+    "minimum-stability": "dev",
     "require": {}
 }
