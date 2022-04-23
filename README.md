@@ -3,6 +3,8 @@ This PHP library will help you to create database connetion using PDO and creati
 
 # How to use :
 ````php
+use Nowshad\DB;
+
 $db = new DB([
         "driver"=>"YOUR_DRIVER_NAME",
         "host"=>"YOUR_HOST_NAME_OR_ADDRESS",
@@ -15,9 +17,9 @@ $db = new DB([
 /*
     YOU MUST PASS AN ARRAY WITH THESE KEYS AND YOUR SPECIFIC VALUES
     TO CONNECT TO THE DATABASE.
-    
+
     "port" and "charset" are optional.
-    
+
 */
 
 # To disconnect :`
@@ -46,7 +48,7 @@ $table->col( 'int', DB::int(1), true )
         ->col( 'enum', DB::enum(['value1', 'value2']) )
         ->col( 'date', DB::date() )
         ->col( 'datetime', DB::datetime() );
- 
+
  $table->create();
 
 // To add columns after creating the table, after calling the "create()" method
@@ -69,7 +71,7 @@ $table->col()->add->drop->drop_all();
 $table->insert([
             'column_name' => 'value'
         ]);
-        
+
 // to update row of the table
 $table->update([
             'column_name' => 'value'
@@ -86,8 +88,8 @@ $table->delete([
             // conditions
             'column_name' => 'value'
         ]);
-        
-        
+
+
 // to fetch rows
 $table->fetch(['column_names_to_fetch'], [
             // conditions
