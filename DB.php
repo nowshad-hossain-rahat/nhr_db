@@ -131,11 +131,13 @@
                     $is_not_null = ($is_not_null) ? "NOT NULL":"";
                     $is_unique = (!$is_primary && $is_unique) ? "UNIQUE":"";
 
-                    $q = "$name $type_and_length $is_primary $is_auto_increment $is_not_null $is_unique";
-                    $this->conn->exec("ALTER TABLE $this->table_name ADD $q");
+                    try{
+                        $q = "$name $type_and_length $is_primary $is_auto_increment $is_not_null $is_unique";
+                        $this->conn->exec("ALTER TABLE $this->table_name ADD $q");
 
-                    $this->col_names[] = $name;
-                    $this->columns[$name] = $q;
+                        $this->col_names[] = $name;
+                        $this->columns[$name] = $q;
+                    }catch(Exception $e){}
 
                     return $this;
                 }
@@ -143,18 +145,22 @@
 
                 // to drop the selected column of the table
                 function drop(string $name){
-                    $this->conn->exec("ALTER TABLE ".$this->table_name." DROP $name");
-                    unset($this->col_names[array_search($name,$this->col_names)]);
-                    unset($this->columns[$name]);
+                    try{
+                        $this->conn->exec("ALTER TABLE ".$this->table_name." DROP $name");
+                        unset($this->col_names[array_search($name,$this->col_names)]);
+                        unset($this->columns[$name]);
+                    }catch(Exception $e){}
                     return $this;
                 }
 
 
                 // to drop the whole table
                 function drop_all(){
-                    $this->conn->exec("DROP TABLE ".$this->table_name);
-                    $this->columns = array();
-                    $this->col_names = array();
+                    try{
+                        $this->conn->exec("DROP TABLE ".$this->table_name);
+                        $this->columns = array();
+                        $this->col_names = array();
+                    }catch(Exception $e){}
                     return $this;
                 }
 
@@ -173,10 +179,17 @@
                         }
 
                         $q = "INSERT INTO ".$this->table_name." ($cols) VALUES ($keys)";
-                        $result = $this->conn->prepare($q);
-                        $result->execute($params);
-                        $this->last_insert_id = $result->lastInsertId();
-                        return $result->rowCount();
+
+                        try{
+                            $result = $this->conn->prepare($q);
+                            $result->execute($params);
+                            return $result->rowCount();
+                        }catch(Exception $e){
+                            return 0;
+                        }
+
+                        return 0;
+
                     }else{return 0;}
                 }
 
@@ -191,11 +204,18 @@
                             $params[":$k"] = $v;
                         }
 
-                        $q = "DELETE FROM $this->table_name $keys";
-                        $result = $this->conn->prepare($q);
-                        $result->execute($params);
-                        return $result->rowCount();
-                    }else{return 0;}
+                        try{
+                            $q = "DELETE FROM $this->table_name $keys";
+                            $result = $this->conn->prepare($q);
+                            $result->execute($params);
+                            return $result->rowCount();
+                        }catch(Exception $e){
+                            return 0;
+                        }
+
+                        return 0;
+
+                    }else{ return 0; }
                 }
 
 
@@ -217,10 +237,16 @@
                         $params[":$col"] = $val;
                     }
 
-                    $q = "UPDATE $this->table_name SET $cols $conds";
-                    $result = $this->conn->prepare($q);
-                    $result->execute($params);
-                    return $result->rowCount();
+                    try{
+                        $q = "UPDATE $this->table_name SET $cols $conds";
+                        $result = $this->conn->prepare($q);
+                        $result->execute($params);
+                        return $result->rowCount();
+                    }catch(Exception $e){
+                        return -1;
+                    }
+
+                    return -1;
 
                 }
 
@@ -263,51 +289,58 @@
 
                     $conds = (!empty($conds)) ? "WHERE $conds":"";
 
-                    $q = "SELECT $cols FROM $this->table_name $conds $order_by $limit";
-                    $result = $this->conn->prepare($q);
-                    count($params) > 0 ? $result->execute($params):$result->execute();
+                    try{
 
-                    return new class($result->fetchAll($return_type)){
+                        $q = "SELECT $cols FROM $this->table_name $conds $order_by $limit";
+                        $result = $this->conn->prepare($q);
+                        count($params) > 0 ? $result->execute($params):$result->execute();
 
-                        private $rows;
+                        return new class($result->fetchAll($return_type)){
 
-                        function __construct($rows){
-                            $this->rows = $rows;
-                        }
+                            private $rows;
 
-                        # to loop through the rows
-                        function each(callable $func,bool $reverse=false){
-                            $rows = ($reverse) ? array_reverse($this->rows):$this->rows;
-                            foreach($rows as $ind=>$row){
-                                $func($row,$ind);
+                            function __construct($rows){
+                                $this->rows = $rows;
                             }
-                            return $this;
-                        }
 
-                        # to return the first row
-                        function first(){
-                            return (count($this->rows) > 0) ? $this->rows[0]:false;
-                        }
+                            # to loop through the rows
+                            function each(callable $func,bool $reverse=false){
+                                $rows = ($reverse) ? array_reverse($this->rows):$this->rows;
+                                foreach($rows as $ind=>$row){
+                                    $func($row,$ind);
+                                }
+                                return $this;
+                            }
 
-                        # to return the last row
-                        function last(){
-                            return (count($this->rows) > 0) ? end($this->rows):false;
-                        }
+                            # to return the first row
+                            function first(){
+                                return (count($this->rows) > 0) ? $this->rows[0]:false;
+                            }
 
-                        # to return a row by index
-                        function get(int $index){
-                            if($index < 0){ return false; }
-                            return (count($this->rows) > $index) ? $this->rows[$index]:false;
-                        }
+                            # to return the last row
+                            function last(){
+                                return (count($this->rows) > 0) ? end($this->rows):false;
+                            }
 
-                        # to return all the rows
-                        function all(){ return $this->rows; }
+                            # to return a row by index
+                            function get(int $index){
+                                if($index < 0){ return false; }
+                                return (count($this->rows) > $index) ? $this->rows[$index]:false;
+                            }
 
-                        # to return all reverse
-                        function reverse(){ return array_reverse($this->rows); }
+                            # to return all the rows
+                            function all(){ return $this->rows; }
 
-                    };
+                            # to return all reverse
+                            function reverse(){ return array_reverse($this->rows); }
 
+                        };
+
+                    }catch(Exception $e){
+                        return false;
+                    }
+
+                    return false;
 
                 }
 
@@ -317,10 +350,16 @@
                 # to count total number of rows in the table
                 function numRows(){
 
-                    $q = "SELECT * FROM ".$this->table_name;
-                    $result = $this->conn->prepare($q);
-                    $result->execute();
-                    return count($result->fetchAll(PDO::FETCH_ASSOC));
+                    try{
+                        $q = "SELECT * FROM ".$this->table_name;
+                        $result = $this->conn->prepare($q);
+                        $result->execute();
+                        return count($result->fetchAll(PDO::FETCH_ASSOC));
+                    }catch(Exception $e){
+                        return -1;
+                    }
+
+                    return -1;
 
                 }
 
@@ -338,8 +377,13 @@
 
                     $query = "CREATE TABLE IF NOT EXISTS ".$this->table_name." ($q)";
 
-                    $this->conn->exec($query);
-                    return true;
+                    try{
+                        return $this->conn->exec($query) === false;
+                    }catch(Exception $e){
+                        return false;
+                    }
+
+                    return false;
                 }
 
             };
