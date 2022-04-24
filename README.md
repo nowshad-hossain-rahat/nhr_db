@@ -8,18 +8,18 @@ This PHP library will help you to create database connetion using PDO and creati
 YOU MUST PASS AN ARRAY WITH THESE KEYS AND YOUR SPECIFIC VALUES
 TO CONNECT TO THE DATABASE.
 
-"port" and "charset" are optional.
+```port``` and ```charset``` are optional.
 
 ```php
 use Nowshad\DB;
 
 $db = new DB([
-        "driver"=>"YOUR_DRIVER_NAME",
-        "host"=>"YOUR_HOST_NAME_OR_ADDRESS",
-        "dbname"=>"YOUR_DATABASE_NAME",
-        "port"=>"YOUR_HOST_PORT",
-        "user"=>"YOUR_DATABASE_USERNAME",
-        "pass"=>"YOUR_DATABASE_PASSWORD"
+        "driver" => "YOUR_DRIVER_NAME",
+        "host" => "YOUR_HOST_NAME_OR_ADDRESS",
+        "dbname" => "YOUR_DATABASE_NAME",
+        "port" => "YOUR_HOST_PORT",
+        "user" => "YOUR_DATABASE_USERNAME",
+        "pass" => "YOUR_DATABASE_PASSWORD"
     ]);
 ```
 
@@ -70,13 +70,13 @@ $table->add(ALL_THE_PARAMETERS_ARE_SAME_AS "col" FUNCTION);
 $table->drop("COLUMN_NAME");
 ```
 
-* To drop all the columns or to drop the whole TABLE_NAME
+* To drop all the columns or to drop the whole ```TABLE_NAME```
 
 ```php
 $table->drop_all();
 ```
 
-NOTE : col,add,drop,drop_all these methods will return the "table object" $table, so in this case so you can do method chaining like
+NOTE : ```col```,```add```,```drop```,```drop_all``` these methods will return the ```table object``` ```$table```, so in this case so you can do method chaining like
 
 ```php
 $table->col()->add->drop->drop_all();
