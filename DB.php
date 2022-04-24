@@ -274,7 +274,7 @@
                         }
 
                         # to loop through the rows
-                        function each($func,bool $reverse=false){
+                        function each(callable $func,bool $reverse=false){
                             $rows = ($reverse) ? array_reverse($this->rows):$this->rows;
                             foreach($rows as $ind=>$row){
                                 $func($row,$ind);

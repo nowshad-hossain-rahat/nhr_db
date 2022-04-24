@@ -120,10 +120,51 @@ $table->delete([
 ```
 
 * To fetch rows
+
+This function will return an object with some functions to access the fetched data.
 ```php
-$table->fetch(['column_names_to_fetch'], [
-            // conditions
-            'column_name' => 'value'
-        ], /* return type */ DB::OBJ|DB::ASSOC|DB::IND);
+$rows = $table->fetch(
+        '*' | [ 'column_names_to_fetch' ], # '*' for all columns or [arrays_of_specific_columns]
+        [ 'id' => '25', 'username' => 'Abdullah' ], # conditions
+        DB::OBJ | DB::ASSOC | DB::IND # return type
+    );
+```
+
+Here ```php DB::OBJ``` for object ```php DB::ASSOC``` for associative array and ```php DB::IND``` for indexed array
+
+* To get all the rows from the fetched data
+
+```php
+$rows->all();
+```
+
+* To get the first row
+
+```php
+$rows->first();
+```
+
+* To get the last row
+
+```php
+$rows->last();
+```
+
+* To loop through the rows
+
+The second parameter is ```false``` by default. If you set this ```true``` then the loop will be in reverse order.
+
+```php
+$rows->each(function($row, $index){
+    # your code
+}, false);
+```
+
+* To get a single row by INDEX
+
+This will return ```false``` if you pass an index less than ```0``` or greater than the number of rows fetched
+
+```php
+$rows->get(5);
 ```
 
