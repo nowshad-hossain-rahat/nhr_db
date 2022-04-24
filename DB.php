@@ -4,7 +4,7 @@
 
     use PDO;
     use Exception;
-    
+
 
     class DB {
 
@@ -95,6 +95,7 @@
                 private $columns = array(),
                         $col_names = array(),
                         $table_name = null;
+                private int $last_insert_id = -1;
 
                 function __construct(string $table_name,$conn){
                     $this->table_name = $table_name;
@@ -168,10 +169,14 @@
                         $q = "INSERT INTO ".$this->table_name." ($cols) VALUES ($keys)";
                         $result = $this->conn->prepare($q);
                         $result->execute($params);
+                        $this->last_insert_id = $result->lastInsertId();
                         return $result->rowCount();
                     }else{return 0;}
                 }
 
+
+                # to get last inserted id
+                function last_insert_id(){ return $this->last_insert_id === -1 ? false:$this->last_insert_id; }
 
 
                 # to perform delete operations
