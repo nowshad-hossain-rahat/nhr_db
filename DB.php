@@ -136,6 +136,8 @@
                     return $this;
                 }
 
+
+                // to drop the selected column of the table
                 function drop(string $name){
                     $this->conn->exec("ALTER TABLE ".$this->table_name." DROP $name");
                     unset($this->col_names[array_search($name,$this->col_names)]);
@@ -144,7 +146,7 @@
                 }
 
 
-                // will drop the whole table
+                // to drop the whole table
                 function drop_all(){
                     $this->conn->exec("DROP TABLE ".$this->table_name);
                     $this->columns = array();
