@@ -86,6 +86,11 @@
         public function quote(string $data){ return $this->conn->quote($data); }
 
 
+        # to get last inserted id
+        function last_insert_id(){
+            return $this->last_insert_id === -1 ? false : $this->last_insert_id;
+        }
+
 
         # to select or create a new table
         function table(string $table_name){
@@ -175,10 +180,6 @@
                         return $result->rowCount();
                     }else{return 0;}
                 }
-
-
-                # to get last inserted id
-                function last_insert_id(){ return $this->last_insert_id === -1 ? false:$this->last_insert_id; }
 
 
                 # to perform delete operations
