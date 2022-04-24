@@ -58,7 +58,7 @@ $table->col( 'int', DB::int(1), true )
 $table->create();
 ```
 
-To add columns after creating the table, after calling the "create()" method
+To add columns after creating the table, after calling the ```create()``` method
 
 ```php
 $table->add(ALL_THE_PARAMETERS_ARE_SAME_AS "col" FUNCTION);
@@ -130,7 +130,7 @@ $rows = $table->fetch(
     );
 ```
 
-Here ```php DB::OBJ``` for object ```php DB::ASSOC``` for associative array and ```php DB::IND``` for indexed array
+Here ```DB::OBJ``` for object ```DB::ASSOC``` for associative array and ```DB::IND``` for indexed array
 
 * To get all the rows from the fetched data
 
