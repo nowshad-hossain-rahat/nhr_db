@@ -88,7 +88,7 @@
 
         # to get last inserted id
         function last_insert_id(){
-            return $this->last_insert_id === -1 ? false : $this->last_insert_id;
+            return $this->conn->lastInsertId() === -1 ? false : $this->conn->lastInsertId();
         }
 
 
@@ -100,7 +100,6 @@
                 private $columns = array(),
                         $col_names = array(),
                         $table_name = null;
-                private int $last_insert_id = -1;
 
                 function __construct(string $table_name,$conn){
                     $this->table_name = $table_name;
