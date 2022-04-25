@@ -177,7 +177,7 @@
                             $this->foreign_key_name = $foreign_key_name;
                         }
 
-                        function references(string $column_name){ $this->to_col = $column_name; }
+                        function references(string $column_name){ $this->to_col = $column_name; return $this; }
 
                         function on(string $table_name){
 
