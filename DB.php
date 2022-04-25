@@ -66,8 +66,9 @@
         # these will return specific data type and length steing of sql
         public static function int(int $l=255){ return "INT($l)"; }
         public static function float(){ return "FLOAT"; }
-        public static function bigint(int $l=255){ return "BIG($l)"; }
+        public static function bigint(int $l=255){ return "BIGINT($l)"; }
         public static function unsigned_int(int $l=255){ return "INT($l) UNSIGNED"; }
+        public static function unsigned_bigint(int $l=255){ return "BIGINT($l) UNSIGNED"; }
         public static function str(int $l=255){ return "VARCHAR($l)"; }
         public static function text(){ return "TEXT"; }
         public static function date(){ return "DATE"; }
@@ -141,7 +142,7 @@
                 function id(){ return $this->col('id', DB::int(), true, true, true, true); }
 
                 # to create two columns `created_at` and `updated_at`
-                function timestamp(){ return $this->col('created_at', DB::datetime())->col('updated_at', DB::datetime()); }
+                function timestamp(){ return $this->col('created_at', DB::datetime(), false, false, true)->col('updated_at', DB::datetime(), false, false, true); }
 
                 # to create a varchar column
                 function str(string $column_name, int $length = 255){ return $this->col($column_name, DB::str($length)); }
@@ -150,16 +151,19 @@
                 function text(string $column_name){ return $this->col($column_name, DB::text()); }
 
                 # to create a date column
-                function date(string $column_name){ return $this->col($column_name, DB::date()); }
+                function date(string $column_name){ return $this->col($column_name, DB::date(), false, false, true); }
 
                 # to create a datetime column
-                function datetime(string $column_name){ return $this->col($column_name, DB::datetime()); }
+                function datetime(string $column_name){ return $this->col($column_name, DB::datetime(), false, false, true); }
 
                 # to create an enum column
-                function enum(string $column_name, array $values = [0, 1]){ return $this->col($column_name, DB::enum($values)); }
+                function enum(string $column_name, array $values = [0, 1]){ return $this->col($column_name, DB::enum($values), false, false, true); }
 
                 # to create a unsigned integer column
                 function unsigned_int(string $column_name, int $length = 255){ return $this->col($column_name, DB::unsigned_int($length)); }
+
+                # to create a unsigned big integer column
+                function unsigned_bigint(string $column_name, int $length = 255){ return $this->col($column_name, DB::unsigned_bigint($length)); }
 
                 # to create a float column
                 function float(string $column_name){ return $this->col($column_name, DB::float()); }
@@ -473,9 +477,12 @@
                         $q = $q.$v.$end;
                     }
 
-                    foreach($this->foreign_keys as $i=>$v){
-                        $end = ($v==end($this->foreign_keys)) ? "":",";
-                        $q = $q.$v.$end;
+                    if (count($this->foreign_keys) > 0) {
+                        $q .= ', ';
+                        foreach ($this->foreign_keys as $i => $v) {
+                            $end = ($v == end($this->foreign_keys)) ? "" : ",";
+                            $q = $q . $v . $end;
+                        }
                     }
 
                     $query = "CREATE TABLE IF NOT EXISTS ".$this->table_name." ($q)";
