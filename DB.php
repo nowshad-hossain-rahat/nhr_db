@@ -82,6 +82,18 @@
         }
 
 
+        # these functions are sql query conditions
+        public static function lt(string $column_name, float $value){ return trim($column_name)." < ".trim($value); }
+        public static function gt(string $column_name, float $value){ return trim($column_name)." > ".trim($value); }
+        public static function lteq(string $column_name, float $value){ return trim($column_name)." <= ".trim($value); }
+        public static function gteq(string $column_name, float $value){ return trim($column_name)." >= ".trim($value); }
+        public static function noteq(string $column_name, $value){ return trim($column_name)." <> ".trim($value); }
+        public static function like(string $column_name, $value){ return trim($column_name)." LIKE ".trim($value); }
+
+        # thsese two functions are condition setter
+        public static function or(...$conditions){ return join(" OR ", $conditions); }
+        public static function and(...$conditions){ return join(" AND ", $conditions); }
+
         # to perform PDO::quote(string)
         public function quote(string $data){ return $this->conn->quote($data); }
 
@@ -143,6 +155,9 @@
                 # to create a unsigned integer column
                 function unsigned_int(string $column_name, int $length = 255){ return $this->col($column_name, DB::unsigned_int($length)); }
 
+                # to create a float column
+                function float(string $column_name){ return $this->col($column_name, DB::float()); }
+
                 # to create a big integer column
                 function bigint(string $column_name, int $length = 255){ return $this->col($column_name, DB::bigint($length)); }
 
@@ -176,14 +191,14 @@
                         function on_delete(string $action){
 
                             if( !isset($this->foreign_key_query) ){ return $this; }
-                            $this->parent_table->foreign_keys[$this->foreign_key_name] = $this->foreign_key_query . " ON DELETE $action";
+                            $this->parent_table->foreign_keys[$this->foreign_key_name] = $this->foreign_key_query . " ON DELETE ".strtoupper($action);
 
                         }
 
                         function on_update(string $action){
 
                             if( !isset($this->foreign_key_query) ){ return $this; }
-                            $this->parent_table->foreign_keys[$this->foreign_key_name] = $this->foreign_key_query . " ON UPDATE $action";
+                            $this->parent_table->foreign_keys[$this->foreign_key_name] = $this->foreign_key_query . " ON UPDATE ".strtoupper($action);
 
                         }
 
@@ -347,8 +362,10 @@
                     foreach($conditions as $k=>$v){
                         unset($conditions["ORDER_BY"]);
                         unset($conditions["LIMIT"]);
-                        if($k!="ORDER_BY" && $k!="LIMIT"){
-                            $end = ($v==end($conditions) ) ? "":" && ";
+                        $end = ($v==end($conditions) ) ? "":" AND ";
+                        if( $k === 'or' ){ $conds .= $v.$end; }
+                        else if( $k === 'and' ){ $conds .= $v.$end; }
+                        else{
                             $conds = $conds."$k=:$k"."$end";
                             $params[":$k"] = $v;
                         }
