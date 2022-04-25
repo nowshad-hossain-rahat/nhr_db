@@ -191,6 +191,7 @@
                             $this->on_table = $table_name;
                             $this->foreign_key_query = "FOREIGN KEY ($this->foreign_key_name) REFERENCES $this->on_table($this->to_col)";
                             $this->parent_table->foreign_keys[$this->foreign_key_name] = $this->foreign_key_query;
+                            return $this;
 
                         }
 
@@ -198,6 +199,7 @@
 
                             if( !isset($this->foreign_key_query) ){ return $this; }
                             $this->parent_table->foreign_keys[$this->foreign_key_name] = $this->foreign_key_query . " ON DELETE ".strtoupper($action);
+                            return $this;
 
                         }
 
@@ -205,6 +207,7 @@
 
                             if( !isset($this->foreign_key_query) ){ return $this; }
                             $this->parent_table->foreign_keys[$this->foreign_key_name] = $this->foreign_key_query . " ON UPDATE ".strtoupper($action);
+                            return $this;
 
                         }
 
