@@ -73,6 +73,7 @@
         public static function text(){ return "TEXT"; }
         public static function date(){ return "DATE"; }
         public static function datetime(){ return "DATETIME"; }
+        public static function timestamp(){ return "TIMESTAMP"; }
         public static function enum(array $values=[0, 1]){
             $enum_values = '';
             foreach($values as $val){
@@ -104,16 +105,62 @@
             return $this->conn->lastInsertId() === -1 ? false : $this->conn->lastInsertId();
         }
 
+        # to create foreign key query string
+        public static function foreign(string $column_name){
+
+            return new class($column_name){
+
+                private string $foreign_key_query;
+                private string $foreign_key_name;
+                private string $to_col;
+                private string $on_table;
+
+                function __construct(string $foreign_key_name){
+                    $this->foreign_key_name = $foreign_key_name;
+                }
+
+                function references(string $column_name){
+                    $this->to_col = $column_name;
+                    return $this;
+                }
+
+                function on(string $table_name){
+
+                    if (!isset($this->to_col) || empty($this->to_col)) { return $this; }
+                    $this->on_table = $table_name;
+                    $this->foreign_key_query = "FOREIGN KEY ($this->foreign_key_name) REFERENCES $this->on_table($this->to_col)";
+                    return $this;
+                }
+
+                function on_delete(string $action){
+
+                    if (!isset($this->foreign_key_query) || empty($this->foreign_key_query)) { return $this; }
+                    $this->foreign_key_query .= " ON DELETE " . strtoupper($action);
+                    return $this;
+                }
+
+                function on_update(string $action){
+
+                    if (!isset($this->foreign_key_query) || empty($this->foreign_key_query)) { return $this; }
+                    $this->foreign_key_query .= " ON UPDATE " . strtoupper($action);
+                    return $this;
+                }
+
+                function __get_query(){ return (!isset($this->foreign_key_query) || empty($this->foreign_key_query)) ? false:$this->foreign_key_query; }
+
+            };
+
+        }
 
         # to select or create a new table
         function table(string $table_name){
 
             return new class($table_name,$this->conn) {
 
-                private $columns = array(),
-                        $col_names = array(),
-                        $table_name = null;
-                public $foreign_keys = array();
+                private array $columns = array();
+                private array $col_names = array();
+                private $table_name = null;
+                private array $foreign_keys = array();
 
                 function __construct(string $table_name,$conn){
                     $this->table_name = $table_name;
@@ -122,14 +169,16 @@
 
 
                 # to add columns to the table
-                function col(string $name,string $type_and_length,bool $is_primary=false, $is_auto_increment=false, bool $is_not_null=false,bool $is_unique=false){
+                function col(string $name,string $type_and_length,bool $is_primary=false, $is_auto_increment=false, bool $is_not_null=false,bool $is_unique=false, string $default='', string $on_update=''){
 
                     $is_primary = ($is_primary) ? "PRIMARY KEY":"";
                     $is_auto_increment = ($is_auto_increment) ? "AUTO_INCREMENT":"";
                     $is_not_null = ($is_not_null) ? "NOT NULL":"";
                     $is_unique = (!$is_primary && $is_unique) ? "UNIQUE":"";
+                    $default = (!empty($default)) ? "DEFAULT ".strtoupper($default):"";
+                    $on_update = (!empty($on_update)) ? "ON UPDATE ".strtoupper($on_update):"";
 
-                    $q = "$name $type_and_length $is_primary $is_auto_increment $is_not_null $is_unique";
+                    $q = "$name $type_and_length $is_primary $is_auto_increment $is_not_null $is_unique $default $on_update";
 
                     $this->col_names[] = $name;
                     $this->columns[$name] = $q;
@@ -142,7 +191,10 @@
                 function id(){ return $this->col('id', DB::int(), true, true, true, true); }
 
                 # to create two columns `created_at` and `updated_at`
-                function timestamp(){ return $this->col('created_at', DB::datetime(), false, false, true)->col('updated_at', DB::datetime(), false, false, true); }
+                function timestamp(){
+                    return $this->col('created_at', DB::timestamp(), false, false, true, false, 'current_timestamp', 'current_timestamp')
+                                ->col('updated_at', DB::datetime(), false, false, true, false, 'current_timestamp', 'current_timestamp');
+                }
 
                 # to create a varchar column
                 function str(string $column_name, int $length = 255){ return $this->col($column_name, DB::str($length)); }
@@ -171,54 +223,14 @@
                 # to create a big integer column
                 function bigint(string $column_name, int $length = 255){ return $this->col($column_name, DB::bigint($length)); }
 
-                # to create foreign key
-                function foreign(string $foreign_key_name){
-
-                    return new class($this, $foreign_key_name){
-
-                        private $parent_table;
-                        private string $foreign_key_query;
-                        private string $foreign_key_name;
-                        private string $to_col;
-                        private string $on_table;
-
-                        function __construct($parent_table, string $foreign_key_name){
-                            $this->parent_table = $parent_table;
-                            $this->foreign_key_name = $foreign_key_name;
+                # to create foreing keys
+                function foreign_keys(...$fks){
+                    foreach($fks as $fk){
+                        if( $fk->__get_query() ){
+                            $this->foreign_keys[] = $fk->__get_query();
                         }
-
-                        function references(string $column_name){ $this->to_col = $column_name; return $this; }
-
-                        function on(string $table_name){
-
-                            if( !isset($this->to_col) ){ return $this; }
-                            $this->on_table = $table_name;
-                            $this->foreign_key_query = "FOREIGN KEY ($this->foreign_key_name) REFERENCES $this->on_table($this->to_col)";
-                            $this->parent_table->foreign_keys[$this->foreign_key_name] = $this->foreign_key_query;
-                            return $this;
-
-                        }
-
-                        function on_delete(string $action){
-
-                            if( !isset($this->foreign_key_query) ){ return $this; }
-                            $this->parent_table->foreign_keys[$this->foreign_key_name] = $this->foreign_key_query . " ON DELETE ".strtoupper($action);
-                            return $this;
-
-                        }
-
-                        function on_update(string $action){
-
-                            if( !isset($this->foreign_key_query) ){ return $this; }
-                            $this->parent_table->foreign_keys[$this->foreign_key_name] = $this->foreign_key_query . " ON UPDATE ".strtoupper($action);
-                            return $this;
-
-                        }
-
-                        function create(){ return $this->parent_table->create(); }
-
-                    };
-
+                    }
+                    return $this;
                 }
 
                 # to alter new columns to the table after it's created
