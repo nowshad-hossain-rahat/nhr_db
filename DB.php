@@ -101,7 +101,7 @@
 
 
         # to get last inserted id
-        function last_insert_id(){
+        public function last_insert_id(){
             return $this->conn->lastInsertId() === -1 ? false : $this->conn->lastInsertId();
         }
 
