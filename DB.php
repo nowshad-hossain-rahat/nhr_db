@@ -111,8 +111,8 @@
 
                 private $columns = array(),
                         $col_names = array(),
-                        $foreign_keys = array(),
                         $table_name = null;
+                public $foreign_keys = array();
 
                 function __construct(string $table_name,$conn){
                     $this->table_name = $table_name;
