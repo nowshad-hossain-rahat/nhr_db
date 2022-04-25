@@ -448,13 +448,13 @@
 
 
                 # to count total number of rows in the table
-                function numRows(){
+                function num_rows(){
 
                     try{
-                        $q = "SELECT * FROM ".$this->table_name;
+                        $q = "SELECT COUNT(*) FROM ".$this->table_name;
                         $result = $this->conn->prepare($q);
                         $result->execute();
-                        return count($result->fetchAll(PDO::FETCH_ASSOC));
+                        return $result->fetchAll(PDO::FETCH_ASSOC);
                     }catch(Exception $e){
                         return -1;
                     }
