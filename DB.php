@@ -193,7 +193,7 @@
                 # to create two columns `created_at` and `updated_at`
                 function timestamp(){
                     return $this->col('created_at', DB::timestamp(), false, false, true, false, 'current_timestamp', 'current_timestamp')
-                                ->col('updated_at', DB::datetime(), false, false, true, false, 'current_timestamp', 'current_timestamp');
+                                ->col('updated_at', DB::timestamp(), false, false, true, false, 'current_timestamp', 'current_timestamp');
                 }
 
                 # to create a varchar column
