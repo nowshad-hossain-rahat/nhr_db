@@ -149,6 +149,12 @@
                 # to create a text column
                 function text(string $column_name){ return $this->col($column_name, DB::text()); }
 
+                # to create a date column
+                function date(string $column_name){ return $this->col($column_name, DB::date()); }
+
+                # to create a datetime column
+                function datetime(string $column_name){ return $this->col($column_name, DB::datetime()); }
+
                 # to create an enum column
                 function enum(string $column_name, array $values = [0, 1]){ return $this->col($column_name, DB::enum($values)); }
 
