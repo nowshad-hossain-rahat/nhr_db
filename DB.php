@@ -202,6 +202,8 @@
 
                         }
 
+                        function create(){ return $this->parent_table->create(); }
+
                     };
 
                 }
