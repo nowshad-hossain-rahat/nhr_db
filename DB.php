@@ -99,6 +99,7 @@
 
                 private $columns = array(),
                         $col_names = array(),
+                        $foreign_keys = array(),
                         $table_name = null;
 
                 function __construct(string $table_name,$conn){
@@ -124,6 +125,73 @@
                 }
 
 
+                # to create an auto incrementable primary key `id` column
+                function id(){ return $this->col('id', DB::int(), true, true, true, true); }
+
+                # to create two columns `created_at` and `updated_at`
+                function timestamp(){ return $this->col('created_at', DB::datetime())->col('updated_at', DB::datetime()); }
+
+                # to create a varchar column
+                function str(string $column_name, int $length = 255){ return $this->col($column_name, DB::str($length)); }
+
+                # to create a text column
+                function text(string $column_name){ return $this->col($column_name, DB::text()); }
+
+                # to create an enum column
+                function enum(string $column_name, array $values = [0, 1]){ return $this->col($column_name, DB::enum($values)); }
+
+                # to create a unsigned integer column
+                function unsigned_int(string $column_name, int $length = 255){ return $this->col($column_name, DB::unsigned_int($length)); }
+
+                # to create a big integer column
+                function bigint(string $column_name, int $length = 255){ return $this->col($column_name, DB::bigint($length)); }
+
+                # to create foreign key
+                function foreign(string $foreign_key_name){
+
+                    return new class($this, $foreign_key_name){
+
+                        private $parent_table;
+                        private string $foreign_key_query;
+                        private string $foreign_key_name;
+                        private string $to_col;
+                        private string $on_table;
+
+                        function __construct($parent_table, string $foreign_key_name){
+                            $this->parent_table = $parent_table;
+                            $this->foreign_key_name = $foreign_key_name;
+                        }
+
+                        function references(string $column_name){ $this->to_col = $column_name; }
+
+                        function on(string $table_name){
+
+                            if( !isset($this->to_col) ){ return $this; }
+                            $this->on_table = $table_name;
+                            $this->foreign_key_query = "FOREIGN KEY ($this->foreign_key_name) REFERENCES $this->on_table($this->to_col)";
+                            $this->parent_table->foreign_keys[$this->foreign_key_name] = $this->foreign_key_query;
+
+                        }
+
+                        function on_delete(string $action){
+
+                            if( !isset($this->foreign_key_query) ){ return $this; }
+                            $this->parent_table->foreign_keys[$this->foreign_key_name] = $this->foreign_key_query . " ON DELETE $action";
+
+                        }
+
+                        function on_update(string $action){
+
+                            if( !isset($this->foreign_key_query) ){ return $this; }
+                            $this->parent_table->foreign_keys[$this->foreign_key_name] = $this->foreign_key_query . " ON UPDATE $action";
+
+                        }
+
+                    };
+
+                }
+
+                # to alter new columns to the table after it's created
                 function add(string $name,string $type_and_length,bool $is_primary=false, $is_auto_increment=false, bool $is_not_null=false,bool $is_unique=false){
 
                     $is_primary = ($is_primary) ? "PRIMARY KEY":"";
@@ -369,21 +437,26 @@
 
                 # will create the table and all the columns added by 'col' function
                 function create(){
+
                     $q = null;
+
                     foreach($this->columns as $i=>$v){
                         $end = ($v==end($this->columns)) ? "":",";
                         $q = $q.$v.$end;
                     }
 
-                    $query = "CREATE TABLE IF NOT EXISTS ".$this->table_name." ($q)";
-
-                    try{
-                        return $this->conn->exec($query) === false;
-                    }catch(Exception $e){
-                        return false;
+                    foreach($this->foreign_keys as $i=>$v){
+                        $end = ($v==end($this->foreign_keys)) ? "":",";
+                        $q = $q.$v.$end;
                     }
 
+                    $query = "CREATE TABLE IF NOT EXISTS ".$this->table_name." ($q)";
+
+                    try{ return $this->conn->exec($query) === false; }
+                    catch(Exception $e){ return false; }
+
                     return false;
+
                 }
 
             };
