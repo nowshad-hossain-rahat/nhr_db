@@ -454,7 +454,7 @@
                         $q = "SELECT COUNT(*) FROM ".$this->table_name;
                         $result = $this->conn->prepare($q);
                         $result->execute();
-                        return $result->fetchAll(PDO::FETCH_ASSOC);
+                        return intval($result->fetchAll(PDO::FETCH_ASSOC)[0]['COUNT(*)']);
                     }catch(Exception $e){
                         return -1;
                     }
