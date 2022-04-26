@@ -90,7 +90,7 @@
         public static function lteq(string $column_name, float $value){ return trim($column_name)." <= ".trim($value); }
         public static function gteq(string $column_name, float $value){ return trim($column_name)." >= ".trim($value); }
         public static function noteq(string $column_name, $value){ return trim($column_name)." <> ".trim($value); }
-        public static function like(string $column_name, $value){ return trim($column_name)." LIKE ".trim($value); }
+        public static function like(string $column_name, $value){ return trim($column_name)." LIKE '".trim($value)."%'"; }
         public static function offset(string $order_by, int $rows_to_skip, int $rows_to_fetch = -1){
             $query_str_part = "ORDER BY $order_by OFFSET $rows_to_skip ROWS";
             if( $rows_to_fetch > -1 ){ $query_str_part .= " FETCH NEXT $rows_to_fetch ROWS ONLY"; }
