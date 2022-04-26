@@ -392,9 +392,13 @@
                         $end = ($v==end($conditions) ) ? "":" AND ";
                         if( $k === 'or' ){ $conds .= $v.$end; }
                         else if( $k === 'and' ){ $conds .= $v.$end; }
-                        else{
-                            $conds = $conds."$k=:$k"."$end";
-                            $params[":$k"] = $v;
+                        else if( $k != 'LIMIT' && $k != 'ORDER_BY' ){
+                            if( preg_match("/[0-9]+/", $k) ){
+                                $conds = $conds."$v"."$end";
+                            }else{
+                                $conds = $conds."$k=:$k"."$end";
+                                $params[":$k"] = $v;
+                            }
                         }
                     }
 
