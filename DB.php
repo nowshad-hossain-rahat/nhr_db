@@ -93,7 +93,7 @@
         public static function like(string $column_name, $value){ return trim($column_name)." LIKE ".trim($value); }
         public static function offset(string $order_by, int $rows_to_skip, int $rows_to_fetch = -1){
             $query_str_part = "ORDER BY $order_by OFFSET $rows_to_skip ROWS";
-            if( $rows_to_fetch > -1 ){ $query_str_part .= " FETCH NEXT $rows_to_fetch ONLY"; }
+            if( $rows_to_fetch > -1 ){ $query_str_part .= " FETCH NEXT $rows_to_fetch ROWS ONLY"; }
             return $query_str_part;
         }
 
@@ -409,8 +409,19 @@
                         }
                     }
 
+                    # checking if `WHERE` need to be added
+                    if( !empty($conds) && preg_match("/[=<>]|(LIKE)/", $conds) ){ $conds = "WHERE $conds"; }
 
-                    $conds = (!empty($conds)) ? "WHERE $conds":"";
+                    # removing misplaced 'AND' and 'OR'
+                    $conds = str_replace(
+                        "AND ORDER",
+                        "ORDER",
+                        str_replace(
+                            "OR ORDER",
+                            "ORDER",
+                            $conds
+                        )
+                    );
 
                     try{
 
@@ -418,8 +429,8 @@
                         $q = "SELECT $cols FROM $this->table_name $conds";
 
                         # validating the query string
-                        if( !preg_match('OFFSET', $q) ){ $q .= $order_by . ' ' . $limit; }
-
+                        if( !preg_match("/(OFFSET)/", $q) ){ $q .= $order_by . ' ' . $limit; }
+                        echo '<h1>' . $q . '</h1>';
                         # preparing the sql statement
                         $result = $this->conn->prepare($q);
 
