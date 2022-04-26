@@ -430,7 +430,6 @@
 
                         # validating the query string
                         if( !preg_match("/(OFFSET)/", $q) ){ $q .= $order_by . ' ' . $limit; }
-                        echo '<h1>' . $q . '</h1>';
                         # preparing the sql statement
                         $result = $this->conn->prepare($q);
 
