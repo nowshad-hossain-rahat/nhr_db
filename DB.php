@@ -475,6 +475,9 @@
                             # to return all reverse
                             function reverse(){ return array_reverse($this->rows); }
 
+                            # to check if there is no rows
+                            function is_empty(){ return count($this->rows) === 0; }
+
                         };
 
                     }catch(Exception $e){
