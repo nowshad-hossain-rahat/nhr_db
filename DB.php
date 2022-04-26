@@ -91,6 +91,11 @@
         public static function gteq(string $column_name, float $value){ return trim($column_name)." >= ".trim($value); }
         public static function noteq(string $column_name, $value){ return trim($column_name)." <> ".trim($value); }
         public static function like(string $column_name, $value){ return trim($column_name)." LIKE ".trim($value); }
+        public static function offset(string $order_by, int $rows_to_skip, int $rows_to_fetch = -1){
+            $query_str_part = "ORDER BY $order_by OFFSET $rows_to_skip ROWS";
+            if( $rows_to_fetch > -1 ){ $query_str_part .= " FETCH NEXT $rows_to_fetch ONLY"; }
+            return $query_str_part;
+        }
 
         # thsese two functions are condition setter
         public static function or(...$conditions){ return join(" OR ", $conditions); }
@@ -365,7 +370,7 @@
                 # to fetch data from the table
                 function fetch($columns, array $conditions=[], $return_type = DB::ASSOC){
 
-                    $conds = null;
+                    $conds = "";
                     $params = array();
                     $order_by = (!empty($conditions["ORDER_BY"])) ? "ORDER BY ".$conditions['ORDER_BY']:"";
                     $limit = (!empty($conditions["LIMIT"])) ? "LIMIT ".$conditions['LIMIT']:"";
@@ -394,6 +399,8 @@
                         else if( $k === 'and' ){ $conds .= $v.$end; }
                         else if( $k != 'LIMIT' && $k != 'ORDER_BY' ){
                             if( preg_match("/[0-9]+/", $k) ){
+                                if( preg_match("/(OFFSET|ORDER BY)/", $v) && preg_match("/(ORDER BY)/", $conds) ){ continue; }
+                                else if( preg_match("/(LIMIT)/", $v) && preg_match("/(OFFSET)/", $conds) ){ continue; }
                                 $conds = $conds."$v"."$end";
                             }else{
                                 $conds = $conds."$k=:$k"."$end";
@@ -407,8 +414,76 @@
 
                     try{
 
-                        $q = "SELECT $cols FROM $this->table_name $conds $order_by $limit";
+                        # creating the sql query string
+                        $q = "SELECT $cols FROM $this->table_name $conds";
+
+                        # validating the query string
+                        if( !preg_match('OFFSET', $q) ){ $q .= $order_by . ' ' . $limit; }
+
+                        # preparing the sql statement
                         $result = $this->conn->prepare($q);
+
+                        # executing the sql statement
+                        count($params) > 0 ? $result->execute($params):$result->execute();
+
+                        return new class($result->fetchAll($return_type)){
+
+                            private $rows;
+
+                            function __construct($rows){
+                                $this->rows = $rows;
+                            }
+
+                            # to loop through the rows
+                            function each(callable $func,bool $reverse=false){
+                                $rows = ($reverse) ? array_reverse($this->rows):$this->rows;
+                                foreach($rows as $ind=>$row){
+                                    $func($row,$ind);
+                                }
+                                return $this;
+                            }
+
+                            # to return the first row
+                            function first(){
+                                return (count($this->rows) > 0) ? $this->rows[0]:false;
+                            }
+
+                            # to return the last row
+                            function last(){
+                                return (count($this->rows) > 0) ? end($this->rows):false;
+                            }
+
+                            # to return a row by index
+                            function get(int $index){
+                                if($index < 0){ return false; }
+                                return (count($this->rows) > $index) ? $this->rows[$index]:false;
+                            }
+
+                            # to return all the rows
+                            function all(){ return $this->rows; }
+
+                            # to return all reverse
+                            function reverse(){ return array_reverse($this->rows); }
+
+                        };
+
+                    }catch(Exception $e){
+                        return false;
+                    }
+
+                    return false;
+
+                }
+
+
+
+
+                # to fetch data from the table using custom sql query
+                function fetch_custom(string $query, array $params, $return_type = DB::ASSOC){
+
+                    try{
+
+                        $result = $this->conn->prepare($query);
                         count($params) > 0 ? $result->execute($params):$result->execute();
 
                         return new class($result->fetchAll($return_type)){
