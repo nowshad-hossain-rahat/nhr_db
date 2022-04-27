@@ -608,7 +608,6 @@
 
                     try{
                         if( $this->conn ){
-                            $this->conn->connect();
                             return $this->conn->exec($query) === false;
                         }else{
                             return false;
