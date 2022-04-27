@@ -594,7 +594,14 @@
 
                     $query = "CREATE TABLE IF NOT EXISTS ".$this->table_name." ($q)";
 
-                    try{ return $this->conn->exec($query) === false; }
+                    try{
+                        if( $this->conn ){
+                            $this->conn->connect();
+                            return $this->conn->exec($query) === false;
+                        }else{
+                            return false;
+                        }
+                    }
                     catch(Exception $e){ return false; }
 
                     return false;
