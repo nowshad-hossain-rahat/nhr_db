@@ -560,8 +560,20 @@
                     try{
                         $q = "SELECT COUNT(*) FROM ".$this->table_name;
                         $result = $this->conn->prepare($q);
-                        $result->execute();
-                        return intval($result->fetchAll(PDO::FETCH_ASSOC)[0]['COUNT(*)']);
+                        if( $result->execute() ){
+                            $all = $result->fetchAll(PDO::FETCH_ASSOC);
+                            if( count($all) > 0 ){
+                                if( $all[0] ){
+                                    return $all[0]['COUNT(*)'];
+                                }else{
+                                    return -1;
+                                }
+                            }else{
+                                return -1;
+                            }
+                        }else{
+                            return -1;
+                        }
                     }catch(Exception $e){
                         return -1;
                     }
