@@ -10,6 +10,7 @@
 
         private $conn = null;
         private $driver, $host, $charset, $db, $user, $pass, $port;
+        private $is_debug_mode_on = false;
 
         public const OBJ = PDO::FETCH_OBJ;
         public const ASSOC = PDO::FETCH_ASSOC;
@@ -31,6 +32,9 @@
 
         }
 
+        # to change debug mode
+        function set_debug(bool $debug){ $this->is_debug_mode_on = $debug; return $this; }
+
         # to disconnect
         function disconnect(){
             $this->conn = null;
@@ -51,7 +55,9 @@
 
                     return true;
                 }
-            }catch(Exception $e){}
+            }catch(Exception $e){
+                if( $this->is_debug_mode_on ){ echo $e; }
+            }
         }
 
 
@@ -161,16 +167,18 @@
         # to select or create a new table
         function table(string $table_name){
 
-            return new class($table_name,$this->conn) {
+            return new class($table_name,$this->conn, $this->is_debug_mode_on) {
 
                 private array $columns = array();
                 private array $col_names = array();
                 private $table_name = null;
                 private array $foreign_keys = array();
+                private bool $is_debug_mode_on = false;
 
-                function __construct(string $table_name,$conn){
+                function __construct(string $table_name,$conn, bool $debug){
                     $this->table_name = $table_name;
                     $this->conn = $conn;
+                    $this->is_debug_mode_on = $debug;
                 }
 
 
@@ -253,7 +261,11 @@
 
                         $this->col_names[] = $name;
                         $this->columns[$name] = $q;
-                    }catch(Exception $e){}
+                    }catch(Exception $e){
+                        if( $this->is_debug_mode_on ){
+                            echo $e;
+                        }
+                    }
 
                     return $this;
                 }
@@ -265,7 +277,11 @@
                         $this->conn->exec("ALTER TABLE ".$this->table_name." DROP $name");
                         unset($this->col_names[array_search($name,$this->col_names)]);
                         unset($this->columns[$name]);
-                    }catch(Exception $e){}
+                    }catch(Exception $e){
+                        if( $this->is_debug_mode_on ){
+                            echo $e;
+                        }
+                    }
                     return $this;
                 }
 
@@ -276,7 +292,11 @@
                         $this->conn->exec("DROP TABLE ".$this->table_name);
                         $this->columns = array();
                         $this->col_names = array();
-                    }catch(Exception $e){}
+                    }catch(Exception $e){
+                        if( $this->is_debug_mode_on ){
+                            echo $e;
+                        }
+                    }
                     return $this;
                 }
 
@@ -301,6 +321,9 @@
                             $result->execute($params);
                             return $result->rowCount();
                         }catch(Exception $e){
+                            if( $this->is_debug_mode_on ){
+                                echo $e;
+                            }
                             return 0;
                         }
 
@@ -326,6 +349,9 @@
                             $result->execute($params);
                             return $result->rowCount();
                         }catch(Exception $e){
+                            if( $this->is_debug_mode_on ){
+                                echo $e;
+                            }
                             return 0;
                         }
 
@@ -359,6 +385,9 @@
                         $result->execute($params);
                         return $result->rowCount();
                     }catch(Exception $e){
+                        if( $this->is_debug_mode_on ){
+                            echo $e;
+                        }
                         return -1;
                     }
 
@@ -432,8 +461,8 @@
                         if( !preg_match("/(OFFSET)/", $q) ){ $q .= $order_by . ' ' . $limit; }
 
                         # removing the useless trailing `AND` and `OR`
-                        if( substr($q, -3, 3) === 'AND' ){ $q = substr_replace($q, '', -3, 3); }
-                        if( substr($q, -2, 2) === 'OR' ){ $q = substr_replace($q, '', -2, 2); }
+                        if( substr($q, -3) === 'AND' ){ substr_replace($q, '', -3); }
+                        if( substr($q, -2) === 'OR' ){ substr_replace($q, '', -2); }
 
                         # preparing the sql statement
                         $result = $this->conn->prepare($q);
@@ -489,6 +518,9 @@
                         };
 
                     }catch(Exception $e){
+                        if( $this->is_debug_mode_on ){
+                            echo $e;
+                        }
                         return false;
                     }
 
@@ -555,6 +587,9 @@
                         };
 
                     }catch(Exception $e){
+                        if( $this->is_debug_mode_on ){
+                            echo $e;
+                        }
                         return false;
                     }
 
@@ -586,6 +621,9 @@
                             return -1;
                         }
                     }catch(Exception $e){
+                        if( $this->is_debug_mode_on ){
+                            echo $e;
+                        }
                         return -1;
                     }
 
@@ -624,7 +662,12 @@
                             return false;
                         }
                     }
-                    catch(Exception $e){ return false; }
+                    catch(Exception $e){
+                        if( $this->is_debug_mode_on ){
+                            echo $e;
+                        }
+                        return false;
+                    }
 
                     return false;
 
