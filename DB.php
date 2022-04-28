@@ -536,6 +536,7 @@
 
                     try{
 
+                        str_replace('#this_table', $this->table_name, $query);
                         $result = $this->conn->prepare($query);
                         count($params) > 0 ? $result->execute($params):$result->execute();
 
