@@ -476,6 +476,9 @@
                             # to return all reverse
                             function reverse(){ return array_reverse($this->rows); }
 
+                            # to get the length of the fetched array
+                            function num_rows(){ return count($this->rows); }
+
                             # to check if there is no rows
                             function is_empty(){ return count($this->rows) === 0; }
 
@@ -536,8 +539,14 @@
                             # to return all the rows
                             function all(){ return $this->rows; }
 
+                            # to get the length of the fetched array
+                            function num_rows(){ return count($this->rows); }
+
                             # to return all reverse
                             function reverse(){ return array_reverse($this->rows); }
+
+                            # to check if there is no rows
+                            function is_empty(){ return count($this->rows) === 0; }
 
                         };
 
