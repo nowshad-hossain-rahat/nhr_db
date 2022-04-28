@@ -426,7 +426,7 @@
                     try{
 
                         # creating the sql query string
-                        $q = "SELECT $cols FROM $this->table_name $conds";
+                        $q = trim("SELECT $cols FROM $this->table_name $conds");
 
                         # validating the query string
                         if( !preg_match("/(OFFSET)/", $q) ){ $q .= $order_by . ' ' . $limit; }
