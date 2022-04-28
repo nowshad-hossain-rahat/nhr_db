@@ -1,6 +1,6 @@
 {
     "name": "nowshad/nhr_db",
-    "version": "2.0.0",
+    "version": "1.7.0",
     "description": "This is a PDO database handler library",
     "type": "library",
     "license": "MIT",
