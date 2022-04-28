@@ -432,8 +432,8 @@
                         if( !preg_match("/(OFFSET)/", $q) ){ $q .= $order_by . ' ' . $limit; }
 
                         # removing the useless trailing `AND` and `OR`
-                        if( substr($q, -3, 3) === 'AND' ){ substr_replace($q, '', -3, 3); }
-                        if( substr($q, -2, 2) === 'OR' ){ substr_replace($q, '', -2, 2); }
+                        if( substr($q, -3, 3) === 'AND' ){ $q = substr_replace($q, '', -3, 3); }
+                        if( substr($q, -2, 2) === 'OR' ){ $q = substr_replace($q, '', -2, 2); }
 
                         # preparing the sql statement
                         $result = $this->conn->prepare($q);
