@@ -47,9 +47,7 @@
                     $port = (empty($this->port)) ? "":"port=$this->port;";
                     $charset = (empty($this->charset)) ? "":"charset=$this->charset;";
 
-                    $this->conn = @new PDO("$this->driver:host=$this->host;$port$charset",$this->user,$this->pass) or die("Error in Connection Building!\nCheck the information you've given on 'DB' setup!");
-                    $this->conn->exec("create database if not exists $this->db");
-                    $this->conn->exec("use $this->db");
+                    $this->conn = @new PDO("$this->driver:host=$this->host;dbname=$this->db;$port$charset",$this->user,$this->pass) or die("Error in Connection Building!\nCheck the information you've given on 'DB' setup!");
 
                     return true;
                 }
