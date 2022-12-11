@@ -11,4 +11,9 @@ $db = new NHR_DB([
 ]);
 
 $test_table = $db->table('test_table');
-print_r($test_table->exists_column('usernam2e') ? "[+] Column exists!\n" : "[+] Column doesn't exists!\n");
+
+if (!$test_table->exists_column('email')) {
+  $test_table->add("email", NHR_DB::str(), false, false, true, true );
+}
+
+print_r($test_table->get_columns());

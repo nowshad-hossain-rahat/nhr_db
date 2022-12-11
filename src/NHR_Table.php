@@ -42,9 +42,11 @@ class NHR_Table
    * @return array
    */
 
-  function get_column_names()
+  function get_columns()
   {
-    return $this->col_names;
+    $result = $this->conn->prepare("DESC $this->name");
+    $result->execute();
+    return $result->fetchAll(PDO::FETCH_OBJ);
   }
 
   /**
