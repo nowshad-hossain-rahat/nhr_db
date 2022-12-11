@@ -3,7 +3,7 @@
     "version": "1.8.0",
     "description": "This is a PDO based database helper library",
     "type": "library",
-    "license": "GPL V3.0 or later",
+    "license": "GNU General Public License v3.0",
     "autoload": {
         "psr-4": {
             "NhrDev\\NHR_DB\\": "./",
