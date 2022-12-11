@@ -1,6 +1,6 @@
 # nhr_db
 
-This PHP library will help you to create database connetion using PDO and creating tables,inserting,updating,fetching,deleting data from database without writing any SQL code.Just create an object of the "DB" class and then the power is yours! :)
+This PHP library will help you to create database connetion using PDO and creating tables,inserting,updating,fetching,deleting data from database without writing any SQL code.Just create an object of the "NHR_DB" class and then the power is yours! :)
 
 # How to install :
 
@@ -58,13 +58,13 @@ if($db->is_connected()){
 ```php
 $table = $db->table( 'table_name' );
 
-$table->col( 'int', DB::int(1), true )
-        ->col( 'varchar', DB::str(100) )
-        ->col( 'text', DB::text() )
-        ->col( 'float', DB::float() )
-        ->col( 'enum', DB::enum(['value1', 'value2']) )
-        ->col( 'date', DB::date() )
-        ->col( 'datetime', DB::datetime() );
+$table->col( 'int', NHR_DB::int(1), true )
+        ->col( 'varchar', NHR_DB::str(100) )
+        ->col( 'text', NHR_DB::text() )
+        ->col( 'float', NHR_DB::float() )
+        ->col( 'enum', NHR_DB::enum(['value1', 'value2']) )
+        ->col( 'date', NHR_DB::date() )
+        ->col( 'datetime', NHR_DB::datetime() );
 
 $table->create();
 ```
@@ -139,11 +139,11 @@ This function will return an object with some functions to access the fetched da
 $rows = $table->fetch(
         '*' | [ 'column_names_to_fetch' ], # '*' for all columns or [arrays_of_specific_columns]
         [ 'id' => '25', 'username' => 'Abdullah' ], # conditions
-        DB::OBJ | DB::ASSOC | DB::IND # return type
+        NHR_DB::OBJ | NHR_DB::ASSOC | NHR_DB::IND # return type
     );
 ```
 
-Here ``DB::OBJ`` for object ``DB::ASSOC`` for associative array and ``DB::IND`` for indexed array
+Here ``NHR_DB::OBJ`` for object ``NHR_DB::ASSOC`` for associative array and ``NHR_DB::IND`` for indexed array
 
 * To get all the rows from the fetched data
 
