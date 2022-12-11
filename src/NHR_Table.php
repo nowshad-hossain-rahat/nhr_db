@@ -59,6 +59,22 @@ class NHR_Table
   }
 
   /**
+   * Checks if a column exists in this table or not
+   * @param string $column_name
+   * @return bool
+   */
+  function exists_column(string $column_name)
+  {
+    $result = $this->conn->prepare("DESC $this->name");
+    $result->execute();
+    foreach($result->fetchAll(PDO::FETCH_OBJ) as $col) {
+      if ($col->Field === $column_name)
+        return true;
+    }
+    return false;
+  }
+
+  /**
    * Add a column to database table
    * @param string $name
    * @param string $type_and_length

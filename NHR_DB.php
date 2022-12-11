@@ -19,7 +19,7 @@ class NHR_DB
 
   private ? PDO $conn = null;
   private array $config;
-  private string $driver, $host, $charset, $db, $user, $pass, $port;
+  private string $driver = "mysql", $host, $charset, $db, $user, $pass, $port;
   private bool $is_debug_mode_on = false;
 
   public const OBJ = PDO::FETCH_OBJ;
@@ -29,7 +29,6 @@ class NHR_DB
   /**
    * NHR_DB constructor
    * @param array $config - [
-   *  ['driver'] => string (mysql),
    *  ['host'] => string (localhost),
    *  ['port'] => int,
    *  ['charset'] => string,
@@ -41,8 +40,15 @@ class NHR_DB
   function __construct(array $config)
   {
 
+    if (!isset($config['user'])) {
+      throw new Exception("(NHR_DB) Error : [user] is reuquired!");
+    } elseif (!isset($config['pass'])) {
+      throw new Exception("(NHR_DB) Error : [pass] is reuquired!");
+    } elseif (!isset($config['dbname'])) {
+      throw new Exception("(NHR_DB) Error : [dbname] is reuquired!");
+    }
+
     $this->config = $config;
-    $this->driver = isset($config["driver"]) ? $config["driver"] : "mysql";
     $this->host = isset($config["host"]) ? $config["host"] : "localhost";
     $this->user = $config["user"];
     $this->pass = $config["pass"];
