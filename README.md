@@ -1,4 +1,5 @@
 # nhr_db
+
 This PHP library will help you to create database connetion using PDO and creating tables,inserting,updating,fetching,deleting data from database without writing any SQL code.Just create an object of the "DB" class and then the power is yours! :)
 
 # How to install :
@@ -14,12 +15,15 @@ This PHP library will help you to create database connetion using PDO and creati
 YOU MUST PASS AN ARRAY WITH THESE KEYS AND YOUR SPECIFIC VALUES
 TO CONNECT TO THE DATABASE.
 
-```port``` and ```charset``` are optional.
+`driver` `host` ``port`` and ``charset`` are optional.
+
+`driver` is set to `mysql` and
+`host` is set to `localhost` by default
 
 ```php
-use Nowshad\DB;
+use NhrDev\NHR_DB\NHR_DB;
 
-$db = new DB([
+$db = new NHR_DB([
         "driver" => "YOUR_DRIVER_NAME",
         "host" => "YOUR_HOST_NAME_OR_ADDRESS",
         "dbname" => "YOUR_DATABASE_NAME",
@@ -34,6 +38,7 @@ $db = new DB([
 ```php
 $db->disconnect();
 ```
+
 * To connect if disconnected :
 
 ```php
@@ -64,7 +69,7 @@ $table->col( 'int', DB::int(1), true )
 $table->create();
 ```
 
-To add columns after creating the table, after calling the ```create()``` method
+To add columns after creating the table, after calling the ``create()`` method
 
 ```php
 $table->add(ALL_THE_PARAMETERS_ARE_SAME_AS "col" FUNCTION);
@@ -76,13 +81,13 @@ $table->add(ALL_THE_PARAMETERS_ARE_SAME_AS "col" FUNCTION);
 $table->drop("COLUMN_NAME");
 ```
 
-* To drop all the columns or to drop the whole ```TABLE_NAME```
+* To drop all the columns or to drop the whole ``TABLE_NAME``
 
 ```php
 $table->drop_all();
 ```
 
-NOTE : ```col```,```add```,```drop```,```drop_all``` these methods will return the ```table object``` ```$table```, so in this case so you can do method chaining like
+NOTE : ``col``,``add``,``drop``,``drop_all`` these methods will return the ``table object`` ``$table``, so in this case so you can do method chaining like
 
 ```php
 $table->col()->add->drop->drop_all();
@@ -97,7 +102,7 @@ $table->insert([
 ```
 
 * To get the last inserted id
-This will return false if no insertion is made.
+  This will return false if no insertion is made.
 
 ```php
 $table->last_insert_id()
@@ -118,6 +123,7 @@ $table->update([
 ```
 
 * To delete row
+
 ```php
 $table->delete([
             // conditions
@@ -128,6 +134,7 @@ $table->delete([
 * To fetch rows
 
 This function will return an object with some functions to access the fetched data.
+
 ```php
 $rows = $table->fetch(
         '*' | [ 'column_names_to_fetch' ], # '*' for all columns or [arrays_of_specific_columns]
@@ -136,7 +143,7 @@ $rows = $table->fetch(
     );
 ```
 
-Here ```DB::OBJ``` for object ```DB::ASSOC``` for associative array and ```DB::IND``` for indexed array
+Here ``DB::OBJ`` for object ``DB::ASSOC`` for associative array and ``DB::IND`` for indexed array
 
 * To get all the rows from the fetched data
 
@@ -158,7 +165,7 @@ $rows->last();
 
 * To loop through the rows
 
-The second parameter is ```false``` by default. If you set this ```true``` then the loop will be in reverse order.
+The second parameter is ``false`` by default. If you set this ``true`` then the loop will be in reverse order.
 
 ```php
 $rows->each(function($row, $index){
@@ -168,9 +175,8 @@ $rows->each(function($row, $index){
 
 * To get a single row by INDEX
 
-This will return ```false``` if you pass an index less than ```0``` or greater than the number of rows fetched
+This will return ``false`` if you pass an index less than ``0`` or greater than the number of rows fetched
 
 ```php
 $rows->get(5);
 ```
-
