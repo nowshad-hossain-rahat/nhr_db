@@ -1,6 +1,6 @@
 <?php
 
-namespace NhrDev\NHR_DB\SRC;
+namespace NhrDev\NHR_DB\Src;
 
 use PDO;
 use Exception;
@@ -10,18 +10,21 @@ class NHR_Table
 {
 
   private NHR_DB $nhr_db;
-  private array $config;
+  private string $db_name, $db_user, $db_password;
   private PDO $conn;
   private array $columns = array();
+  private ?array $fetched_columns = null;
   private array $col_names = array();
   private string $name;
   private array $foreign_keys = array();
   private bool $is_debug_mode_on = false;
 
-  function __construct(NHR_DB $nhr_db, array $config, string $name, PDO $conn, bool $debug)
+  function __construct(NHR_DB $nhr_db, string $db_name, string $db_user, string $db_password, string $name, PDO $conn, bool $debug)
   {
     $this->nhr_db = $nhr_db;
-    $this->config = $config;
+    $this->db_name = $db_name;
+    $this->db_user = $db_user;
+    $this->db_password = $db_password;
     $this->name = $name;
     $this->conn = $conn;
     $this->is_debug_mode_on = $debug;
@@ -56,7 +59,7 @@ class NHR_Table
   function exists()
   {
     $result = $this->conn->prepare("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=:dbname AND TABLE_NAME=:name");
-    $result->execute(['dbname' => $this->config["dbname"], 'name' => $this->name]);
+    $result->execute(['dbname' => $this->db_name, 'name' => $this->name]);
     return $result->fetch(PDO::FETCH_OBJ) ? true : false;
   }
 
@@ -67,11 +70,19 @@ class NHR_Table
    */
   function exists_column(string $column_name)
   {
-    $result = $this->conn->prepare("DESC $this->name");
-    $result->execute();
-    foreach($result->fetchAll(PDO::FETCH_OBJ) as $col) {
-      if ($col->Field === $column_name)
-        return true;
+    if ($this->fetched_columns === null) {
+      $result = $this->conn->prepare("DESC $this->name");
+      $result->execute();
+      $this->fetched_columns = $result->fetchAll(PDO::FETCH_OBJ);
+      foreach ($this->fetched_columns as $col) {
+        if ($col->Field === $column_name)
+          return true;
+      }
+    } else {
+      foreach ($this->fetched_columns as $col) {
+        if ($col->Field === $column_name)
+          return true;
+      }
     }
     return false;
   }

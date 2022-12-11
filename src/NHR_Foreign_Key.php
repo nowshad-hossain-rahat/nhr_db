@@ -1,6 +1,6 @@
 <?php
 
-namespace NhrDev\NHR_DB\SRC;
+namespace NhrDev\NHR_DB\Src;
 
 class NHR_Foreign_Key
 {

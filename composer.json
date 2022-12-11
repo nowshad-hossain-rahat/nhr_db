@@ -1,13 +1,13 @@
 {
     "name": "nhrdev/nhr_db",
-    "version": "1.8.0",
-    "description": "This is a PDO based database helper library",
+    "version": "1.8.1",
+    "description": "This is a PDO based MySQL or MariaDB database helper library",
     "type": "library",
     "license": "GPL-3.0-or-later",
     "autoload": {
         "psr-4": {
             "NhrDev\\NHR_DB\\": "./",
-            "NhrDev\\NHR_DB\\SRC\\": "./src"
+            "NhrDev\\NHR_DB\\Src\\": "./src"
         }
     },
     "authors": [

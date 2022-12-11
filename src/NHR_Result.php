@@ -1,6 +1,6 @@
 <?php
 
-namespace NhrDev\NHR_DB\SRC;
+namespace NhrDev\NHR_DB\Src;
 
 /**
  * A helper class for the fetched data

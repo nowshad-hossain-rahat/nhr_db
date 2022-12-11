@@ -4,8 +4,8 @@ namespace NhrDev\NHR_DB;
 
 use PDO;
 use Exception;
-use NhrDev\NHR_DB\SRC\NHR_Foreign_Key;
-use NhrDev\NHR_DB\SRC\NHR_Table;
+use NhrDev\NHR_DB\Src\NHR_Foreign_Key;
+use NhrDev\NHR_DB\Src\NHR_Table;
 
 
 require_once "./vendor/autoload.php";
@@ -18,8 +18,8 @@ class NHR_DB
 {
 
   private ? PDO $conn = null;
-  private array $config;
-  private string $driver = "mysql", $host, $charset, $db, $user, $pass, $port;
+  private string $driver = "mysql";
+  private string $host, $charset, $db, $user, $pass, $port;
   private bool $is_debug_mode_on = false;
 
   public const OBJ = PDO::FETCH_OBJ;
@@ -28,16 +28,15 @@ class NHR_DB
 
   /**
    * NHR_DB constructor
-   * @param array $config - [
-   *  ['host'] => string (localhost),
-   *  ['port'] => int,
-   *  ['charset'] => string,
-   *  'user' => string,
-   *  'pass' => string,
-   *  'dbname' => string
-   * ]
+   * @param string $db_user
+   * @param string $db_password
+   * @param string $db_name
+   * @param string $host_name
+   * @param int $port
+   * @param string $charset
+   * @throws Exception
    */
-  function __construct(array $config)
+  function __construct(string $db_user, string $db_password, string $db_name, string $host_name = 'localhost', int $port = -1, string $charset = '')
   {
 
     if (!isset($config['user'])) {
@@ -48,13 +47,12 @@ class NHR_DB
       throw new Exception("(NHR_DB) Error : [dbname] is reuquired!");
     }
 
-    $this->config = $config;
-    $this->host = isset($config["host"]) ? $config["host"] : "localhost";
-    $this->user = $config["user"];
-    $this->pass = $config["pass"];
-    $this->db = $config["dbname"];
-    $this->port = isset($config["port"]) ? $config["port"] : "";
-    $this->charset = isset($config["charset"]) ? $config["charset"] : "";
+    $this->host = $host_name ? $host_name : "localhost";
+    $this->user = $db_user;
+    $this->pass = $db_password;
+    $this->db = $db_name;
+    $this->port = $port !== -1 ? $port : "";
+    $this->charset = $charset ? $charset : "";
 
     $this->connect();
 
@@ -402,7 +400,7 @@ class NHR_DB
   # to select or create a new table
   function table(string $table_name)
   {
-    return new NHR_Table($this, $this->config, $table_name, $this->conn, $this->is_debug_mode_on);
+    return new NHR_Table($this, $this->db, $this->user, $this->pass, $table_name, $this->conn, $this->is_debug_mode_on);
   }
 
 
