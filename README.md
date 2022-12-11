@@ -5,7 +5,7 @@ This PHP library will help you to create database connetion using PDO and creati
 # How to install :
 
 ```bash
-[username@host]$ composer require nowshad/nhr_db
+[username@host]$ composer require nhrdev/nhr_db
 ```
 
 # How to use :
