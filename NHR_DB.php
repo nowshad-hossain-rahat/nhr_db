@@ -18,6 +18,7 @@ class NHR_DB
 {
 
   private ? PDO $conn = null;
+  private array $config;
   private string $driver, $host, $charset, $db, $user, $pass, $port;
   private bool $is_debug_mode_on = false;
 
@@ -27,7 +28,7 @@ class NHR_DB
 
   /**
    * NHR_DB constructor
-   * @param array $info - [
+   * @param array $config - [
    *  ['driver'] => string (mysql),
    *  ['host'] => string (localhost),
    *  ['port'] => int,
@@ -37,16 +38,17 @@ class NHR_DB
    *  'dbname' => string
    * ]
    */
-  function __construct(array $info)
+  function __construct(array $config)
   {
 
-    $this->driver = isset($info["driver"]) ? $info["driver"] : "mysql";
-    $this->host = isset($info["host"]) ? $info["host"] : "localhost";
-    $this->user = $info["user"];
-    $this->pass = $info["pass"];
-    $this->db = $info["dbname"];
-    $this->port = isset($info["port"]) ? $info["port"] : "";
-    $this->charset = isset($info["charset"]) ? $info["charset"] : "";
+    $this->config = $config;
+    $this->driver = isset($config["driver"]) ? $config["driver"] : "mysql";
+    $this->host = isset($config["host"]) ? $config["host"] : "localhost";
+    $this->user = $config["user"];
+    $this->pass = $config["pass"];
+    $this->db = $config["dbname"];
+    $this->port = isset($config["port"]) ? $config["port"] : "";
+    $this->charset = isset($config["charset"]) ? $config["charset"] : "";
 
     $this->connect();
 
@@ -109,7 +111,7 @@ class NHR_DB
    */
   function is_connected()
   {
-    return ($this->conn != null);
+    return ($this->conn !== null) ? true : false;
   }
 
 
@@ -394,9 +396,7 @@ class NHR_DB
   # to select or create a new table
   function table(string $table_name)
   {
-
-    return new NHR_Table($table_name, $this->conn, $this->is_debug_mode_on);
-
+    return new NHR_Table($this, $this->config, $table_name, $this->conn, $this->is_debug_mode_on);
   }
 
 

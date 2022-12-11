@@ -9,16 +9,20 @@ use NhrDev\NHR_DB\NHR_DB;
 class NHR_Table
 {
 
+  private NHR_DB $nhr_db;
+  private array $config;
   private PDO $conn;
   private array $columns = array();
   private array $col_names = array();
-  private string $table_name;
+  private string $name;
   private array $foreign_keys = array();
   private bool $is_debug_mode_on = false;
 
-  function __construct(string $table_name, PDO $conn, bool $debug)
+  function __construct(NHR_DB $nhr_db, array $config, string $name, PDO $conn, bool $debug)
   {
-    $this->table_name = $table_name;
+    $this->nhr_db = $nhr_db;
+    $this->config = $config;
+    $this->name = $name;
     $this->conn = $conn;
     $this->is_debug_mode_on = $debug;
   }
@@ -27,11 +31,11 @@ class NHR_Table
    * Returns the table name;
    * @return string
    */
-  function get_table_name()
+  function get_name()
   {
-    return $this->table_name;
+    return $this->name;
   }
-  
+
 
   /**
    * Returns the column names
@@ -43,6 +47,16 @@ class NHR_Table
     return $this->col_names;
   }
 
+  /**
+   * Checks if table exists
+   * @return bool
+   */
+  function exists()
+  {
+    $result = $this->conn->prepare("SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_SCHEMA=:dbname AND TABLE_NAME=:name");
+    $result->execute(['dbname' => $this->config["dbname"], 'name' => $this->name]);
+    return $result->fetch(PDO::FETCH_OBJ) ? true : false;
+  }
 
   /**
    * Add a column to database table
@@ -224,7 +238,7 @@ class NHR_Table
 
     try {
       $q = "$name $type_and_length $is_primary $is_auto_increment $is_not_null $is_unique";
-      $this->conn->exec("ALTER TABLE $this->table_name ADD $q");
+      $this->conn->exec("ALTER TABLE $this->name ADD $q");
 
       $this->col_names[] = $name;
       $this->columns[$name] = $q;
@@ -241,39 +255,40 @@ class NHR_Table
   /**
    * Drop selected column of the table
    * @param string $name
-   * @return NHR_Table
+   * @return bool
    */
   function drop(string $name)
   {
     try {
-      $this->conn->exec("ALTER TABLE " . $this->table_name . " DROP $name");
+      $dropped = $this->conn->exec("ALTER TABLE " . $this->name . " DROP $name") === 0;
       unset($this->col_names[array_search($name, $this->col_names)]);
       unset($this->columns[$name]);
+      return $dropped;
     } catch (Exception $e) {
       if ($this->is_debug_mode_on) {
         echo $e;
       }
+      return false;
     }
-    return $this;
   }
 
 
   /**
    * Drops the complete table
-   * @return NHR_Table
+   * @return bool
    */
   function drop_all()
   {
     try {
-      $this->conn->exec("DROP TABLE " . $this->table_name);
       $this->columns = array();
       $this->col_names = array();
+      return $this->conn->exec("DROP TABLE $this->name") === 0;
     } catch (Exception $e) {
       if ($this->is_debug_mode_on) {
         echo $e;
       }
+      return false;
     }
-    return $this;
   }
 
 
@@ -297,7 +312,7 @@ class NHR_Table
         $params[":$k"] = $v;
       }
 
-      $q = "INSERT INTO " . $this->table_name . " ($cols) VALUES ($keys)";
+      $q = "INSERT INTO " . $this->name . " ($cols) VALUES ($keys)";
 
       try {
         $result = $this->conn->prepare($q);
@@ -333,7 +348,7 @@ class NHR_Table
       }
 
       try {
-        $q = "DELETE FROM $this->table_name $keys";
+        $q = "DELETE FROM $this->name $keys";
         $result = $this->conn->prepare($q);
         $result->execute($params);
         return $result->rowCount();
@@ -375,7 +390,7 @@ class NHR_Table
     }
 
     try {
-      $q = "UPDATE $this->table_name SET $cols $conds";
+      $q = "UPDATE $this->name SET $cols $conds";
       $result = $this->conn->prepare($q);
       $result->execute($params);
       return $result->rowCount();
@@ -462,7 +477,7 @@ class NHR_Table
     try {
 
       # creating the sql query string
-      $q = trim("SELECT $cols FROM $this->table_name $conds");
+      $q = trim("SELECT $cols FROM $this->name $conds");
 
       # validating the query string
       if (!preg_match("/(OFFSET)/", $q)) {
@@ -509,7 +524,7 @@ class NHR_Table
 
     try {
 
-      $query = str_replace('#{this_table}', $this->table_name, $query);
+      $query = str_replace('#{this_table}', $this->name, $query);
       $result = $this->conn->prepare($query);
       count($params) > 0 ? $result->execute($params) : $result->execute();
 
@@ -536,7 +551,7 @@ class NHR_Table
 
     try {
 
-      $q = "SELECT COUNT(*) FROM " . $this->table_name;
+      $q = "SELECT COUNT(*) FROM " . $this->name;
       $result = $this->conn->prepare($q);
 
       if ($result->execute()) {
@@ -592,7 +607,7 @@ class NHR_Table
       }
     }
 
-    $query = "CREATE TABLE IF NOT EXISTS " . $this->table_name . " ($q)";
+    $query = "CREATE TABLE IF NOT EXISTS " . $this->name . " ($q)";
 
     try {
       if ($this->conn) {
