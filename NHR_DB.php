@@ -8,7 +8,7 @@ use NhrDev\NHR_DB\Src\NHR_Foreign_Key;
 use NhrDev\NHR_DB\Src\NHR_Table;
 
 
-require_once "./vendor/autoload.php";
+require_once __DIR__ . "/vendor/autoload.php";
 
 
 /**
