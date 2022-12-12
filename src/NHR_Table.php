@@ -636,7 +636,7 @@ class NHR_Table
       }
     }
 
-    $query = "CREATE TABLE IF NOT EXISTS " . $this->name . " ($q)";
+    $query = "CREATE TABLE " . $this->name . " ($q)";
 
     try {
       if ($this->conn) {
