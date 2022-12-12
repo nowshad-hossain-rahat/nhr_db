@@ -35,14 +35,6 @@ class NHR_DB
   function __construct(string $db_user, string $db_password, string $db_name, string $host_name = 'localhost', int $port = -1, string $charset = '')
   {
 
-    if (!isset($config['user'])) {
-      throw new Exception("(NHR_DB) Error : [user] is reuquired!");
-    } elseif (!isset($config['pass'])) {
-      throw new Exception("(NHR_DB) Error : [pass] is reuquired!");
-    } elseif (!isset($config['dbname'])) {
-      throw new Exception("(NHR_DB) Error : [dbname] is reuquired!");
-    }
-
     $this->host = $host_name ? $host_name : "localhost";
     $this->user = $db_user;
     $this->pass = $db_password;
