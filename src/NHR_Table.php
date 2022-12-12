@@ -437,10 +437,10 @@ class NHR_Table
    * Fetches rows from the database table
    * @param string|array $columns Default is `'*'` - this means (all) | Or you can specify columns in an array
    * @param array $conditions
-   * @param NHR_Result|bool $return_type
+   * @param int $return_type NHR_DB::OBJ|NHR_DB::ASSOC|NHR_DB::IND
    * @return bool|object
    */
-  function fetch($columns = '*', array $conditions = [], $return_type = NHR_DB::ASSOC)
+  function fetch($columns = '*', array $conditions = [], int $return_type = NHR_DB::ASSOC)
   {
 
     $conds = "";
@@ -545,10 +545,10 @@ class NHR_Table
    * Fetch data from the table using custom sql query
    * @param string $query Place `#{this_table}` into the query string to use the current table name
    * @param array $params
-   * @param NHR_Result|bool $return_type
+   * @param int $return_type NHR_DB::OBJ|NHR_DB::ASSOC|NHR_DB::IND
    * @return bool|object
    */
-  function fetch_custom(string $query, array $params, $return_type = NHR_DB::ASSOC)
+  function fetch_custom(string $query, array $params, int $return_type = NHR_DB::ASSOC)
   {
 
     try {
