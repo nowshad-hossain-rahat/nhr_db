@@ -438,7 +438,7 @@ class NHR_Table
    * @param string|array $columns Default is `'*'` - this means (all) | Or you can specify columns in an array
    * @param array $conditions
    * @param int $return_type NHR_DB::OBJ|NHR_DB::ASSOC|NHR_DB::IND
-   * @return bool|object
+   * @return NHR_Result|bool
    */
   function fetch($columns = '*', array $conditions = [], int $return_type = NHR_DB::ASSOC)
   {
@@ -546,7 +546,7 @@ class NHR_Table
    * @param string $query Place `#{this_table}` into the query string to use the current table name
    * @param array $params
    * @param int $return_type NHR_DB::OBJ|NHR_DB::ASSOC|NHR_DB::IND
-   * @return bool|object
+   * @return NHR_Result|bool
    */
   function fetch_custom(string $query, array $params, int $return_type = NHR_DB::ASSOC)
   {
