@@ -1,6 +1,6 @@
 {
     "name": "nhrdev/nhr_db",
-    "version": "1.8.1",
+    "version": "1.9.1",
     "description": "This is a PDO based MySQL or MariaDB database helper library",
     "type": "library",
     "license": "GPL-3.0-or-later",
