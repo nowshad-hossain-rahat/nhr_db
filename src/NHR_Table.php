@@ -330,16 +330,17 @@ class NHR_Table
   function insert(array $cols_and_values)
   {
     if (count($cols_and_values) > 0) {
-      $cols = "";
-      $keys = "";
+
+      $cols = join(",", array_keys($cols_and_values));
+
+      $keys = join(",", array_map(function ($key) {
+        return ":$key";
+      }, array_keys($cols_and_values)));
+
       $params = array();
 
-      foreach ($cols_and_values as $k => $v) {
-        $end = ($v == end($cols_and_values)) ? "" : ",";
-        $cols = $cols . $k . $end;
-        $keys = $keys . ":$k" . $end;
+      foreach ($cols_and_values as $k => $v)
         $params[":$k"] = $v;
-      }
 
       $q = "INSERT INTO " . $this->name . " ($cols) VALUES ($keys)";
 
@@ -362,19 +363,21 @@ class NHR_Table
 
   /**
    * Performs SQL delete operation
-   * @param array $where
+   * @param array $conditions
    * @return int
    */
-  function delete(array $where)
+  function delete(array $conditions)
   {
-    if (count($where) > 0) {
-      $keys = "WHERE ";
+    if (count($conditions) > 0) {
+
+      $keys = "WHERE " . join(" && ", array_map(function ($key) {
+        return "$key=:$key";
+      }, array_keys($conditions)));
+
       $params = array();
-      foreach ($where as $k => $v) {
-        $end = ($v == end($where)) ? "" : " && ";
-        $keys = $keys . "$k=:$k" . $end;
+
+      foreach ($conditions as $k => $v)
         $params[":$k"] = $v;
-      }
 
       try {
         $q = "DELETE FROM $this->name $keys";
@@ -397,24 +400,26 @@ class NHR_Table
   /**
    * Updates the database table
    * @param array $cols_and_values
-   * @param array $where
+   * @param array $conditions
    * @return int
    */
-  function update(array $cols_and_values, array $where)
+  function update(array $cols_and_values, array $conditions)
   {
-    $conds = "WHERE ";
-    $cols = "";
+    $conds = "WHERE " . join(" && ", array_map(function ($key) {
+      return "$key=:$key" . "__NHR_CONDITION";
+    }, array_keys($conditions)));
+
+    $cols = join(" && ", array_map(function ($key) {
+      return "$key=:$key";
+    }, array_keys($cols_and_values)));
+
     $params = array();
 
-    foreach ($where as $k => $v) {
-      $end = ($v == end($where)) ? "" : " && ";
-      $conds = $conds . $k . "=" . ":$k" . "_CONDITION$end";
-      $params[":$k" . "_CONDITION"] = $v;
+    foreach ($conditions as $k => $v) {
+      $params[":$k" . "__NHR_CONDITION"] = $v;
     }
 
     foreach ($cols_and_values as $col => $val) {
-      $end = ($val == end($cols_and_values)) ? "" : ",";
-      $cols = $cols . "$col=:$col $end";
       $params[":$col"] = $val;
     }
 
