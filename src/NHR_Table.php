@@ -128,6 +128,17 @@ class NHR_Table
   }
 
   /**
+   * Add a integer column
+   * @param string $column_name
+   * @param int $length
+   * @return NHR_Table
+   */
+  function int(string $column_name, int $length = 255)
+  {
+    return $this->col($column_name, NHR_DB::int($length));
+  }
+
+  /**
    * Add two columns `created_at` and `updated_at`
    * @return NHR_Table
    */
