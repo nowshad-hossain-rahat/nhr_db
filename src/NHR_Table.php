@@ -381,7 +381,7 @@ class NHR_Table
   {
     if (count($conditions) > 0) {
 
-      $keys = "WHERE " . join(" && ", array_map(function ($key) {
+      $keys = "WHERE " . join(",", array_map(function ($key) {
         return "$key=:$key";
       }, array_keys($conditions)));
 
@@ -416,11 +416,11 @@ class NHR_Table
    */
   function update(array $cols_and_values, array $conditions)
   {
-    $conds = "WHERE " . join(" && ", array_map(function ($key) {
+    $conds = "WHERE " . join(",", array_map(function ($key) {
       return "$key=:$key" . "__NHR_CONDITION";
     }, array_keys($conditions)));
 
-    $cols = join(" && ", array_map(function ($key) {
+    $cols = join(",", array_map(function ($key) {
       return "$key=:$key";
     }, array_keys($cols_and_values)));
 
