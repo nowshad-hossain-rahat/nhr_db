@@ -16,7 +16,7 @@
             "email": "nowshad.hossain.rahat@gmail.com"
         }
     ],
-    "minimum-stability": "stable",
+    "minimum-stability": "dev",
     "require": {
         "php": ">=7.4"
     }
