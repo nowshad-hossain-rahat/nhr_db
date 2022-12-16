@@ -4,12 +4,13 @@ namespace NhrDev\NHR_DB\Src;
 
 use PDO;
 use Exception;
-use NhrDev\NHR_DB\NHR_DB;
+use NhrDev\NHR_DB\DB;
+use NhrDev\NHR_DB\Src\SQLQueryBuilder;
 
-class NHR_Table
+class Table
 {
 
-  private NHR_DB $nhr_db;
+  private DB $nhr_db;
   private string $db_name, $db_user, $db_password;
   private PDO $conn;
   private array $columns = array();
@@ -19,7 +20,7 @@ class NHR_Table
   private array $foreign_keys = array();
   private bool $is_debug_mode_on = false;
 
-  function __construct(NHR_DB $nhr_db, string $db_name, string $db_user, string $db_password, string $name, PDO $conn, bool $debug)
+  function __construct(DB $nhr_db, string $db_name, string $db_user, string $db_password, string $name, PDO $conn, bool $debug)
   {
     $this->nhr_db = $nhr_db;
     $this->db_name = $db_name;
@@ -97,7 +98,7 @@ class NHR_Table
    * @param bool $is_unique
    * @param string $default
    * @param string $on_update
-   * @return NHR_Table
+   * @return Table
    */
   function col(string $name, string $type_and_length, bool $is_primary = false, bool $is_auto_increment = false, bool $is_not_null = false, bool $is_unique = false, string $default = '', string $on_update = '')
   {
@@ -120,133 +121,133 @@ class NHR_Table
 
   /**
    * Add an auto incrementable primary key `id` column
-   * @return NHR_Table
+   * @return Table
    */
   function id()
   {
-    return $this->col('id', NHR_DB::int(), true, true, true, true);
+    return $this->col('id', DB::int(), true, true, true, true);
   }
 
   /**
    * Add a integer column
    * @param string $column_name
    * @param int $length
-   * @return NHR_Table
+   * @return Table
    */
   function int(string $column_name, int $length = 255)
   {
-    return $this->col($column_name, NHR_DB::int($length));
+    return $this->col($column_name, DB::int($length));
   }
 
   /**
    * Add two columns `created_at` and `updated_at`
-   * @return NHR_Table
+   * @return Table
    */
   function timestamp()
   {
-    return $this->col('created_at', NHR_DB::timestamp(), false, false, true, false, 'current_timestamp', 'current_timestamp')
-      ->col('updated_at', NHR_DB::timestamp(), false, false, true, false, 'current_timestamp', 'current_timestamp');
+    return $this->col('created_at', DB::timestamp(), false, false, true, false, 'current_timestamp', 'current_timestamp')
+      ->col('updated_at', DB::timestamp(), false, false, true, false, 'current_timestamp', 'current_timestamp');
   }
 
   /**
    * Add a varchar column
    * @param string $column_name
    * @param int $length
-   * @return NHR_Table
+   * @return Table
    */
   function str(string $column_name, int $length = 255)
   {
-    return $this->col($column_name, NHR_DB::str($length));
+    return $this->col($column_name, DB::str($length));
   }
 
   /**
    * Add a text column
    * @param string $column_name
-   * @return NHR_Table
+   * @return Table
    */
   function text(string $column_name)
   {
-    return $this->col($column_name, NHR_DB::text());
+    return $this->col($column_name, DB::text());
   }
 
   /**
    * Add a date column
    * @param string $column_name
-   * @return NHR_Table
+   * @return Table
    */
   function date(string $column_name)
   {
-    return $this->col($column_name, NHR_DB::date(), false, false, true);
+    return $this->col($column_name, DB::date(), false, false, true);
   }
 
   /**
    * Add a datetime oclumn
    * @param string $column_name
-   * @return NHR_Table
+   * @return Table
    */
   function datetime(string $column_name)
   {
-    return $this->col($column_name, NHR_DB::datetime(), false, false, true);
+    return $this->col($column_name, DB::datetime(), false, false, true);
   }
 
   /**
    * Add an enum column with the given values
    * @param string $column_name
    * @param array $values [0, 1, 2, 3, 4, ...] | [ 'true', 'false' ]
-   * @return NHR_Table
+   * @return Table
    */
   function enum (string $column_name, array $values = [0, 1])
   {
-    return $this->col($column_name, NHR_DB::enum ($values), false, false, true);
+    return $this->col($column_name, DB::enum ($values), false, false, true);
   }
 
   /**
    * Add an unsigned int colulmn
    * @param string $column_name
    * @param int $length
-   * @return NHR_Table
+   * @return Table
    */
   function unsigned_int(string $column_name, int $length = 255)
   {
-    return $this->col($column_name, NHR_DB::unsigned_int($length));
+    return $this->col($column_name, DB::unsigned_int($length));
   }
 
   /**
    * Add an unsigned bigint column
    * @param string $column_name
    * @param int $length
-   * @return NHR_Table
+   * @return Table
    */
   function unsigned_bigint(string $column_name, int $length = 255)
   {
-    return $this->col($column_name, NHR_DB::unsigned_bigint($length));
+    return $this->col($column_name, DB::unsigned_bigint($length));
   }
 
   /**
    * Add a float column
    * @param string $column_name
-   * @return NHR_Table
+   * @return Table
    */
   function float(string $column_name)
   {
-    return $this->col($column_name, NHR_DB::float());
+    return $this->col($column_name, DB::float());
   }
 
   /**
    * Add a bigint column
    * @param string $column_name
    * @param int $length
-   * @return NHR_Table
+   * @return Table
    */
   function bigint(string $column_name, int $length = 255)
   {
-    return $this->col($column_name, NHR_DB::bigint($length));
+    return $this->col($column_name, DB::bigint($length));
   }
 
   /**
    * Add foreign keys
    * @param array $foreign_keys
-   * @return NHR_Table
+   * @return Table
    */
   function foreign_keys(...$foreign_keys)
   {
@@ -266,7 +267,7 @@ class NHR_Table
    * @param mixed $is_auto_increment
    * @param bool $is_not_null
    * @param bool $is_unique
-   * @return NHR_Table
+   * @return Table
    */
   function add(string $name, string $type_and_length, bool $is_primary = false, $is_auto_increment = false, bool $is_not_null = false, bool $is_unique = false)
   {
@@ -372,6 +373,37 @@ class NHR_Table
   }
 
 
+  private function parse_where_statement(array $conditions)
+  {
+    $conds = "WHERE ";
+    $params = array();
+
+    foreach ($conditions as $k => $v) {
+      if ($k !== 'or' && gettype($v) === 'string') {
+        $conds .= $k . ':' . $k . '_NHR_CONDITION_ AND ';
+        $params[":$k" . "_NHR_CONDITION_"] = $v;
+      } elseif ($k === 'or' && gettype($v) === 'array') {
+        $conds .= ' OR ';
+        foreach ($v as $or_k => $or_v) {
+          if (gettype($or_v) === 'string') {
+            $conds .= $or_k . ":" . $or_k . "_NHR_CONDITION_ OR ";
+            $params[":$or_k" . "_NHR_CONDITION_"] = $or_v;
+          }
+        }
+      }
+    }
+
+    // formatting and cleaing where query part
+    $conds = preg_replace("/\s*AND\s*OR/", " OR", $conds);
+    $conds = trim(substr_replace($conds, "", strlen($conds) - 4, 4));
+
+    return [
+      'conditions' => $conds,
+      'params' => $params
+    ];
+  }
+
+
   /**
    * Performs SQL delete operation
    * @param array $conditions
@@ -381,17 +413,20 @@ class NHR_Table
   {
     if (count($conditions) > 0) {
 
-      $keys = "WHERE " . join(",", array_map(function ($key) {
-        return "$key=:$key";
-      }, array_keys($conditions)));
+      $cnp = $this->parse_where_statement($conditions);
 
+      $conds = $cnp['conditions'];
       $params = array();
+
+      foreach ($cnp['params'] as $k => $v) {
+        $params[$k] = $v;
+      }
 
       foreach ($conditions as $k => $v)
         $params[":$k"] = $v;
 
       try {
-        $q = "DELETE FROM $this->name $keys";
+        $q = "DELETE FROM $this->name $conds";
         $result = $this->conn->prepare($q);
         $result->execute($params);
         return $result->rowCount();
@@ -412,40 +447,13 @@ class NHR_Table
    * Updates the database table
    * @param array $cols_and_values
    * @param array $conditions
-   * @return int
+   * @return SQLQueryBuilder
    */
-  function update(array $cols_and_values, array $conditions)
+  function update(array $cols_and_values)
   {
-    $conds = "WHERE " . join(",", array_map(function ($key) {
-      return "$key=:$key" . "__NHR_CONDITION";
-    }, array_keys($conditions)));
-
-    $cols = join(",", array_map(function ($key) {
-      return "$key=:$key";
-    }, array_keys($cols_and_values)));
-
-    $params = array();
-
-    foreach ($conditions as $k => $v) {
-      $params[":$k" . "__NHR_CONDITION"] = $v;
-    }
-
-    foreach ($cols_and_values as $col => $val) {
-      $params[":$col"] = $val;
-    }
-
-    try {
-      $q = "UPDATE $this->name SET $cols $conds";
-      $result = $this->conn->prepare($q);
-      $result->execute($params);
-      return $result->rowCount();
-    } catch (Exception $e) {
-      if ($this->is_debug_mode_on) {
-        echo $e;
-      }
-      return -1;
-    }
-
+    $sql_conditions = new SQLQueryBuilder($this->conn, $this, true);
+    $sql_conditions->update($cols_and_values);
+    return $sql_conditions;
   }
 
 
@@ -453,10 +461,10 @@ class NHR_Table
    * Fetches rows from the database table
    * @param string|array $columns Default is `'*'` - this means (all) | Or you can specify columns in an array
    * @param array $conditions
-   * @param int $return_type NHR_DB::OBJ|NHR_DB::ASSOC|NHR_DB::IND
-   * @return NHR_Result|bool
+   * @param int $return_type DB::OBJ|DB::ASSOC|DB::IND
+   * @return Result|bool
    */
-  function fetch($columns = '*', array $conditions = [], int $return_type = NHR_DB::ASSOC)
+  function fetch($columns = '*', array $conditions = [], int $return_type = DB::ASSOC)
   {
 
     $conds = "";
@@ -543,7 +551,7 @@ class NHR_Table
       # executing the sql statement
       count($params) > 0 ? $result->execute($params) : $result->execute();
 
-      return new NHR_Result($result->fetchAll($return_type));
+      return new Result($result->fetchAll($return_type));
 
     } catch (Exception $e) {
       if ($this->is_debug_mode_on) {
@@ -561,10 +569,10 @@ class NHR_Table
    * Fetch data from the table using custom sql query
    * @param string $query Place `#{this_table}` into the query string to use the current table name
    * @param array $params
-   * @param int $return_type NHR_DB::OBJ|NHR_DB::ASSOC|NHR_DB::IND
-   * @return NHR_Result|bool
+   * @param int $return_type DB::OBJ|DB::ASSOC|DB::IND
+   * @return Result|bool
    */
-  function fetch_custom(string $query, array $params, int $return_type = NHR_DB::ASSOC)
+  function fetch_custom(string $query, array $params, int $return_type = DB::ASSOC)
   {
 
     try {
@@ -573,7 +581,7 @@ class NHR_Table
       $result = $this->conn->prepare($query);
       count($params) > 0 ? $result->execute($params) : $result->execute();
 
-      return new NHR_Result($result->fetchAll($return_type));
+      return new Result($result->fetchAll($return_type));
 
     } catch (Exception $e) {
       if ($this->is_debug_mode_on) {
@@ -631,7 +639,7 @@ class NHR_Table
 
 
   /**
-   * Creates a table with the columns added by calling the `NHR_Table->col(..)` function
+   * Creates a table with the columns added by calling the `Table->col(..)` function
    * @return bool
    */
   function create()

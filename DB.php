@@ -4,13 +4,13 @@ namespace NhrDev\NHR_DB;
 
 use PDO;
 use Exception;
-use NhrDev\NHR_DB\Src\NHR_Foreign_Key;
-use NhrDev\NHR_DB\Src\NHR_Table;
+use NhrDev\NHR_DB\Src\Foreign_Key;
+use NhrDev\NHR_DB\Src\Table;
 
 /**
  * PDO based database helper class, developed to help developers.
  */
-class NHR_DB
+class DB
 {
 
   private ? PDO $conn = null;
@@ -23,7 +23,7 @@ class NHR_DB
   public const IND = PDO::FETCH_NUM;
 
   /**
-   * NHR_DB constructor
+   * DB constructor
    * @param string $db_user
    * @param string $db_password
    * @param string $db_name
@@ -221,101 +221,103 @@ class NHR_DB
 
   /**
    * Less than (<) SQL condition
-   * @param string $column_name
    * @param float $value
    * @return string
    */
-  public static function lt(string $column_name, float $value)
+  public static function lt(float $value)
   {
-    return trim($column_name) . " < $value";
+    return " < $value";
   }
 
   /**
    * Greater than (>) SQL condition
-   * @param string $column_name
    * @param float $value
    * @return string
    */
-  public static function gt(string $column_name, float $value)
+  public static function gt(float $value)
   {
-    return trim($column_name) . " > $value";
+    return " > $value";
   }
 
   /**
    * Less than equal to (<=) SQL condition
-   * @param string $column_name
    * @param float $value
    * @return string
    */
-  public static function lteq(string $column_name, float $value)
+  public static function lteq(float $value)
   {
-    return trim($column_name) . " <= $value";
+    return " <= $value";
   }
 
   /**
    * Greater than equal to (>=) SQL condition
-   * @param string $column_name
    * @param float $value
    * @return string
    */
-  public static function gteq(string $column_name, float $value)
+  public static function gteq(float $value)
   {
-    return trim($column_name) . " >= $value";
+    return " >= $value";
   }
 
   /**
    * Not equal to (<>) SQL condition
-   * @param string $column_name
    * @param string $value
    * @return string
    */
-  public static function noteq(string $column_name, string $value)
+  public static function noteq(string $value)
   {
-    return trim($column_name) . " <> " . trim($value);
+    return " <> " . trim($value);
   }
 
   /**
    * Equal to (=) SQL condition
-   * @param string $column_name
    * @param string $value
    * @return string
    */
-  public static function eq(string $column_name, string $value)
+  public static function eq(string $value)
   {
-    return trim($column_name) . " = '" . trim($value) . "'";
+    return " = '" . trim($value) . "'";
+  }
+
+  /**
+   * BETWEEN first_value AND second_value SQL condition
+   * @param float $first_value
+   * @param float $second_value
+   * @return string
+   */
+  public static function between(float $first_value, float $second_value)
+  {
+    return " BETWEEN $first_value AND $second_value";
   }
 
   /**
    * Like (LIKE %t%) SQL condition
-   * @param string $column_name
    * @param string $value
    * @return string
    */
-  public static function like(string $column_name, string $value)
+  public static function like(string $value)
   {
-    return trim($column_name) . " LIKE '%" . trim($value) . "%'";
+    return " LIKE '%" . trim($value) . "%'";
   }
 
   /**
    * Begins Like (LIKE t%) SQL condition
-   * @param string $column_name
    * @param string $value
    * @return string
    */
-  public static function bgins_like(string $column_name, string $value)
+  public static function begins_like(string $value)
   {
-    return trim($column_name) . " LIKE '" . trim($value) . "%'";
+    return " LIKE '" . trim($value) . "%'";
   }
 
   /**
    * Ends Like (LIKE %t) SQL condition
-   * @param string $column_name
    * @param string $value
    * @return string
    */
-  public static function ends_like(string $column_name, string $value)
+  public static function ends_like(string $value)
   {
-    return trim($column_name) . " LIKE '%" . trim($value) . "'";
+    return " LIKE '%" . trim($value) . "'";
   }
 
   /**
@@ -378,17 +380,17 @@ class NHR_DB
   /**
    * Foreign key query part builder
    * @param string $column_name
-   * @return NHR_Foreign_Key
+   * @return Foreign_Key
    */
   public static function foreign(string $column_name)
   {
-    return new NHR_Foreign_Key($column_name);
+    return new Foreign_Key($column_name);
   }
 
   # to select or create a new table
   function table(string $table_name)
   {
-    return new NHR_Table($this, $this->db, $this->user, $this->pass, $table_name, $this->conn, $this->is_debug_mode_on);
+    return new Table($this, $this->db, $this->user, $this->pass, $table_name, $this->conn, $this->is_debug_mode_on);
   }
 
 

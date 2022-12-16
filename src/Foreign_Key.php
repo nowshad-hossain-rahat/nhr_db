@@ -2,7 +2,7 @@
 
 namespace NhrDev\NHR_DB\Src;
 
-class NHR_Foreign_Key
+class Foreign_Key
 {
 
   private string $foreign_key_query;

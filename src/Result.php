@@ -5,7 +5,7 @@ namespace NhrDev\NHR_DB\Src;
 /**
  * A helper class for the fetched data
  */
-class NHR_Result
+class Result
 {
 
   private array $rows;
@@ -19,7 +19,7 @@ class NHR_Result
    * Loop through the rows
    * @param callable $func
    * @param bool $reverse
-   * @return NHR_Result
+   * @return Result
    */
   function each(callable $func, bool $reverse = false)
   {
