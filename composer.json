@@ -7,7 +7,8 @@
     "autoload": {
         "psr-4": {
             "NhrDev\\NHR_DB\\": "./",
-            "NhrDev\\NHR_DB\\Src\\": "./src"
+            "NhrDev\\NHR_DB\\Src\\": "./src",
+            "NhrDev\\NHR_DB\\Src\\QueryBuilders\\": "./src/query-builders"
         }
     },
     "authors": [

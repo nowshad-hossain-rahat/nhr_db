@@ -5,7 +5,7 @@ namespace NhrDev\NHR_DB\Src;
 use PDO;
 use Exception;
 use NhrDev\NHR_DB\DB;
-use NhrDev\NHR_DB\Src\SQLQueryBuilder;
+use NhrDev\NHR_DB\Src\QueryBuilders\Update;
 
 class Table
 {
@@ -447,11 +447,11 @@ class Table
    * Updates the database table
    * @param array $cols_and_values
    * @param array $conditions
-   * @return SQLQueryBuilder
+   * @return Update
    */
   function update(array $cols_and_values)
   {
-    $sql_conditions = new SQLQueryBuilder($this->conn, $this, true);
+    $sql_conditions = new Update($this->conn, $this, true, $this->is_debug_mode_on);
     $sql_conditions->update($cols_and_values);
     return $sql_conditions;
   }
