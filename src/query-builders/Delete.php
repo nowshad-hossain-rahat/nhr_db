@@ -6,50 +6,28 @@ use Exception;
 use NhrDev\NHR_DB\Src\Table;
 use PDO;
 
-class Update extends SQLQueryBuilder
+class Delete extends SQLQueryBuilder
 {
 
-  private string $value_postfix = "_nhr_sql_value";
-  private array $pdo_update_parameters = [];
-
-
   /**
-   * Update query initializer
+   * Delete query initializer
    * @param array $columns_and_values
    * @param PDO $db_connection
    * @param Table $table
    * @param bool $is_debug_mode_on
    */
-  function __construct(array $columns_and_values, PDO $db_connection, Table $table, bool $is_debug_mode_on = false)
+  function __construct(PDO $db_connection, Table $table, bool $is_debug_mode_on = false)
   {
     parent::__construct($db_connection, $table, $is_debug_mode_on);
-    $this->generate_update_query($columns_and_values);
+    $this->sql_query = "DELETE FROM " . $this->table->get_name();
   }
-
-  /**
-   * Refers to SQL `UPDATE` operation
-   * @param array $columns_and_values [ 'name' => 'username', 'email' => 'example@gmail.com' ]
-   */
-  private function generate_update_query(array $columns_and_values)
-  {
-    $update_columns = join(",", array_map(function ($key) {
-      return "$key=:$key" . $this->value_postfix;
-    }, array_keys($columns_and_values)));
-
-    foreach ($columns_and_values as $col => $val) {
-      $this->pdo_update_parameters[":" . $col . $this->value_postfix] = ((gettype($val) === 'string') ? "'$val'" : $val);
-    }
-
-    $this->sql_query = "UPDATE " . $this->table->get_name() . " SET $update_columns";
-  }
-
 
   /**
    * This referes to the SQL `AND` operator
    * @param string $column_name
    * @param string $operator
    * @param mixed $value
-   * @return Update
+   * @return Delete
    */
   public function where(string $column_name, string $operator, $value = null)
   {
@@ -63,19 +41,63 @@ class Update extends SQLQueryBuilder
    * @param string $column_name
    * @param string $operator
    * @param mixed $value
-   * @return Update
+   * @return Delete
    */
   public function or (string $column_name, string $operator, $value = null)
   {
-    parent::or($column_name, $operator, $value);
+    parent::or ($column_name, $operator, $value);
+    return $this;
+  }
+
+
+  /**
+   * This referes to the SQL `LIMIT` operator
+   * @param int $length
+   * @return Delete
+   */
+  public function limit(int $length)
+  {
+    $this->limit_length = $length;
+    return $this;
+  }
+
+  /**
+   * This refers to the SQL `ORDER BY` operator
+   * @param string $column_name
+   * @param string $order Possible values `ASC` | `DESC`
+   * @return Delete
+   */
+  public function order_by(string $column_name, string $order = 'ASC')
+  {
+    $this->order_by_column = $column_name;
+    $this->order = $order === 'ASC' ? $order : 'DESC';
+    return $this;
+  }
+
+  /**
+   * This refers to the SQL `OFFSET [COUNT] ROWS`
+   * @param int $number_of_rows_to_skip
+   * @return Delete
+   */
+  public function offset(int $number_of_rows_to_skip)
+  {
+    $this->offset_rows_count = $number_of_rows_to_skip;
     return $this;
   }
 
 
   protected function parse_special_operations()
   {
-    if (!empty( $this->conditions_sql_str )) {
+    if (!empty($this->conditions_sql_str)) {
       $this->conditions_sql_str = "WHERE " . trim($this->conditions_sql_str);
+    }
+
+    if ($this->order_by_column) {
+      $this->conditions_sql_str .= " ORDER BY $this->order_by_column $this->order";
+    }
+
+    if ($this->limit_length > 0) {
+      $this->conditions_sql_str .= " LIMIT $this->limit_length";
     }
   }
 
@@ -101,8 +123,8 @@ class Update extends SQLQueryBuilder
 
       $this->sql_query = "$this->sql_query $this->conditions_sql_str";
 
-      $result = $this->conn->prepare(trim( $this->sql_query ));
-      $result->execute($this->pdo_update_parameters);
+      $result = $this->conn->prepare(trim($this->sql_query));
+      $result->execute();
 
       return $result->rowCount();
 

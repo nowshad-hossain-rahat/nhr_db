@@ -88,7 +88,7 @@ class DB
       }
     } catch (Exception $e) {
       if ($this->is_debug_mode_on) {
-        echo $e;
+        echo $e->getMessage();
       }
       return false;
     }
@@ -210,11 +210,9 @@ class DB
    */
   public static function enum (array $values = [0, 1])
   {
-    $enum_values = '';
-    foreach ($values as $val) {
-      $comma = (end($values) == $val) ? '' : ', ';
-      $enum_values = $enum_values . "'$val'$comma";
-    }
+    $enum_values = join(",", array_map(function ($value) {
+      return "'" . htmlspecialchars($value) . "'";
+    }, $values));
     return "ENUM($enum_values)";
   }
 
@@ -266,7 +264,7 @@ class DB
    */
   public static function noteq(string $value)
   {
-    return " <> " . trim($value);
+    return " <> " . htmlspecialchars( trim($value) );
   }
 
   /**
@@ -276,7 +274,7 @@ class DB
    */
   public static function eq(string $value)
   {
-    return " = '" . trim($value) . "'";
+    return " = '" . htmlspecialchars(trim( $value )) . "'";
   }
 
   /**
@@ -297,7 +295,7 @@ class DB
    */
   public static function like(string $value)
   {
-    return " LIKE '%" . trim($value) . "%'";
+    return " LIKE '%" . htmlspecialchars(trim($value)) . "%'";
   }
 
   /**
@@ -307,7 +305,7 @@ class DB
    */
   public static function begins_like(string $value)
   {
-    return " LIKE '" . trim($value) . "%'";
+    return " LIKE '" . htmlspecialchars( trim($value) ) . "%'";
   }
 
   /**
@@ -317,7 +315,7 @@ class DB
    */
   public static function ends_like(string $value)
   {
-    return " LIKE '%" . trim($value) . "'";
+    return " LIKE '%" . htmlspecialchars( trim($value) ) . "'";
   }
 
   /**
@@ -329,33 +327,12 @@ class DB
    */
   public static function offset(string $order_by, int $rows_to_skip, int $rows_to_fetch = -1)
   {
-    $query_str_part = "ORDER BY $order_by OFFSET $rows_to_skip ROWS";
+    $query_str_part = "ORDER BY " . trim( $order_by ) . " OFFSET $rows_to_skip ROWS";
     if ($rows_to_fetch > -1) {
       $query_str_part .= " FETCH NEXT $rows_to_fetch ROWS ONLY";
     }
     return $query_str_part;
   }
-
-  /**
-   * To set SQL `OR` conditions
-   * @param array $conditions
-   * @return string
-   */
-  public static function or (...$conditions)
-  {
-    return join(" OR ", $conditions);
-  }
-
-  /**
-   * To set SQL `AND` conditions
-   * @param array $conditions
-   * @return string
-   */
-  public static function and (...$conditions)
-  {
-    return join(" AND ", $conditions);
-  }
-
 
   /**
    * Alternative of PDO::quote(string)

@@ -2,6 +2,8 @@
 
 namespace NhrDev\NHR_DB\Src;
 
+use NhrDev\NHR_DB\Src\QueryBuilders\Delete;
+use NhrDev\NHR_DB\Src\QueryBuilders\Select;
 use PDO;
 use Exception;
 use NhrDev\NHR_DB\DB;
@@ -125,7 +127,7 @@ class Table
    */
   function id()
   {
-    return $this->col('id', DB::int(), true, true, true, true);
+    return $this->col('id', DB::unsigned_bigint(), true, true, true, true);
   }
 
   /**
@@ -134,9 +136,9 @@ class Table
    * @param int $length
    * @return Table
    */
-  function int(string $column_name, int $length = 255)
+  function int(string $column_name, int $length = 255, bool $is_primary = false, bool $is_auto_increment = false, bool $is_not_null = false, bool $is_unique = false, string $default = '', string $on_update = '')
   {
-    return $this->col($column_name, DB::int($length));
+    return $this->col($column_name, DB::int($length), $is_primary, $is_auto_increment, $is_not_null, $is_unique, $default, $on_update);
   }
 
   /**
@@ -155,9 +157,9 @@ class Table
    * @param int $length
    * @return Table
    */
-  function str(string $column_name, int $length = 255)
+  function str(string $column_name, int $length = 255, bool $is_primary = false, bool $is_auto_increment = false, bool $is_not_null = false, bool $is_unique = false, string $default = '', string $on_update = '')
   {
-    return $this->col($column_name, DB::str($length));
+    return $this->col($column_name, DB::str($length), $is_primary, $is_auto_increment, $is_not_null, $is_unique, $default, $on_update);
   }
 
   /**
@@ -165,9 +167,9 @@ class Table
    * @param string $column_name
    * @return Table
    */
-  function text(string $column_name)
+  function text(string $column_name, bool $is_primary = false, bool $is_auto_increment = false, bool $is_not_null = false, bool $is_unique = false, string $default = '', string $on_update = '')
   {
-    return $this->col($column_name, DB::text());
+    return $this->col($column_name, DB::text(), $is_primary, $is_auto_increment, $is_not_null, $is_unique, $default, $on_update);
   }
 
   /**
@@ -285,7 +287,7 @@ class Table
       $this->columns[$name] = $q;
     } catch (Exception $e) {
       if ($this->is_debug_mode_on) {
-        echo $e;
+        echo $e->getMessage();
       }
     }
 
@@ -307,7 +309,7 @@ class Table
       return $dropped;
     } catch (Exception $e) {
       if ($this->is_debug_mode_on) {
-        echo $e;
+        echo $e->getMessage();
       }
       return false;
     }
@@ -326,7 +328,7 @@ class Table
       return $this->conn->exec("DROP TABLE $this->name") === 0;
     } catch (Exception $e) {
       if ($this->is_debug_mode_on) {
-        echo $e;
+        echo $e->getMessage();
       }
       return false;
     }
@@ -352,7 +354,7 @@ class Table
       $params = array();
 
       foreach ($cols_and_values as $k => $v)
-        $params[":$k"] = $v;
+        $params["$k"] = $v;
 
       $q = "INSERT INTO " . $this->name . " ($cols) VALUES ($keys)";
 
@@ -362,7 +364,7 @@ class Table
         return $result->rowCount();
       } catch (Exception $e) {
         if ($this->is_debug_mode_on) {
-          echo $e;
+          echo $e->getMessage();
         }
         return 0;
       }
@@ -406,40 +408,11 @@ class Table
 
   /**
    * Performs SQL delete operation
-   * @param array $conditions
-   * @return int
+   * @return Delete
    */
-  function delete(array $conditions)
+  function delete()
   {
-    if (count($conditions) > 0) {
-
-      $cnp = $this->parse_where_statement($conditions);
-
-      $conds = $cnp['conditions'];
-      $params = array();
-
-      foreach ($cnp['params'] as $k => $v) {
-        $params[$k] = $v;
-      }
-
-      foreach ($conditions as $k => $v)
-        $params[":$k"] = $v;
-
-      try {
-        $q = "DELETE FROM $this->name $conds";
-        $result = $this->conn->prepare($q);
-        $result->execute($params);
-        return $result->rowCount();
-      } catch (Exception $e) {
-        if ($this->is_debug_mode_on) {
-          echo $e;
-        }
-        return 0;
-      }
-
-    } else {
-      return 0;
-    }
+    return new Delete($this->conn, $this, $this->is_debug_mode_on);
   }
 
 
@@ -451,115 +424,20 @@ class Table
    */
   function update(array $cols_and_values)
   {
-    $sql_conditions = new Update($this->conn, $this, true, $this->is_debug_mode_on);
-    $sql_conditions->update($cols_and_values);
+    $sql_conditions = new Update($cols_and_values, $this->conn, $this, $this->is_debug_mode_on);
     return $sql_conditions;
   }
 
 
   /**
    * Fetches rows from the database table
-   * @param string|array $columns Default is `'*'` - this means (all) | Or you can specify columns in an array
-   * @param array $conditions
-   * @param int $return_type DB::OBJ|DB::ASSOC|DB::IND
-   * @return Result|bool
+   * @param string|array $column_names Default is `'*'` - this means (all) | Or you can specify columns in an array
+   * @param int $fetch_mode DB::OBJ|DB::ASSOC|DB::IND
+   * @return Select
    */
-  function fetch($columns = '*', array $conditions = [], int $return_type = DB::ASSOC)
+  function select(array $column_names, int $fetch_mode = DB::ASSOC)
   {
-
-    $conds = "";
-    $params = array();
-    $order_by = (!empty($conditions["ORDER_BY"])) ? "ORDER BY " . $conditions['ORDER_BY'] : "";
-    $limit = (!empty($conditions["LIMIT"])) ? "LIMIT " . $conditions['LIMIT'] : "";
-    $cols = '*';
-
-
-
-    # parsing the filtered columns
-    if (gettype($columns) == 'string') {
-      $cols = '*';
-    } else if (gettype($columns) == 'array') {
-      $cols = '';
-      foreach ($columns as $column) {
-        $comma = (end($columns) == $column) ? '' : ',';
-        $cols = $cols . $column . $comma;
-      }
-    }
-
-
-    # parsing the query conditions
-    foreach ($conditions as $k => $v) {
-      unset($conditions["ORDER_BY"]);
-      unset($conditions["LIMIT"]);
-      $end = ($v == end($conditions)) ? "" : " AND ";
-      if ($k === 'or') {
-        $conds .= $v . $end;
-      } else if ($k === 'and') {
-        $conds .= $v . $end;
-      } else if ($k != 'LIMIT' && $k != 'ORDER_BY') {
-        if (preg_match("/[0-9]+/", $k)) {
-          if (preg_match("/(OFFSET|ORDER BY)/", $v) && preg_match("/(ORDER BY)/", $conds)) {
-            continue;
-          } else if (preg_match("/(LIMIT)/", $v) && preg_match("/(OFFSET)/", $conds)) {
-            continue;
-          }
-          $conds = $conds . "$v" . "$end";
-        } else {
-          $conds = $conds . "$k=:$k" . "$end";
-          $params[":$k"] = $v;
-        }
-      }
-    }
-
-    # checking if `WHERE` need to be added
-    if (!empty($conds) && preg_match("/[=<>]|(LIKE)/", $conds)) {
-      $conds = "WHERE $conds";
-    }
-
-    # removing misplaced 'AND' and 'OR'
-    $conds = str_replace(
-      "AND ORDER",
-      "ORDER",
-      str_replace(
-        "OR ORDER",
-        "ORDER",
-        $conds
-      )
-    );
-
-    try {
-
-      # creating the sql query string
-      $q = trim("SELECT $cols FROM $this->name $conds");
-
-      # validating the query string
-      if (!preg_match("/(OFFSET)/", $q)) {
-        $q .= $order_by . ' ' . $limit;
-      }
-
-      # removing the useless trailing `AND` and `OR`
-      if (substr($q, -3) === 'AND') {
-        substr_replace($q, '', -3);
-      }
-      if (substr($q, -2) === 'OR') {
-        substr_replace($q, '', -2);
-      }
-
-      # preparing the sql statement
-      $result = $this->conn->prepare($q);
-
-      # executing the sql statement
-      count($params) > 0 ? $result->execute($params) : $result->execute();
-
-      return new Result($result->fetchAll($return_type));
-
-    } catch (Exception $e) {
-      if ($this->is_debug_mode_on) {
-        echo $e;
-      }
-      return false;
-    }
-
+    return new Select($column_names, $this->conn, $this, $this->is_debug_mode_on, $fetch_mode);
   }
 
 
@@ -569,10 +447,10 @@ class Table
    * Fetch data from the table using custom sql query
    * @param string $query Place `#{this_table}` into the query string to use the current table name
    * @param array $params
-   * @param int $return_type DB::OBJ|DB::ASSOC|DB::IND
+   * @param int $fetch_mode DB::OBJ|DB::ASSOC|DB::IND
    * @return Result|bool
    */
-  function fetch_custom(string $query, array $params, int $return_type = DB::ASSOC)
+  function fetch_custom(string $query, array $params, int $fetch_mode = DB::ASSOC)
   {
 
     try {
@@ -581,11 +459,11 @@ class Table
       $result = $this->conn->prepare($query);
       count($params) > 0 ? $result->execute($params) : $result->execute();
 
-      return new Result($result->fetchAll($return_type));
+      return new Result($result->fetchAll($fetch_mode));
 
     } catch (Exception $e) {
       if ($this->is_debug_mode_on) {
-        echo $e;
+        echo $e->getMessage();
       }
       return false;
     }
@@ -627,7 +505,7 @@ class Table
 
     } catch (Exception $e) {
       if ($this->is_debug_mode_on) {
-        echo $e;
+        echo $e->getMessage();
       }
       return -1;
     }
@@ -645,7 +523,7 @@ class Table
   function create()
   {
 
-    $q = null;
+    $q = "";
 
     foreach ($this->columns as $i => $v) {
       $end = ($v == end($this->columns)) ? "" : ",";
@@ -653,7 +531,7 @@ class Table
     }
 
     if (count($this->foreign_keys) > 0) {
-      $q .= ', ';
+      $q .= ',';
       foreach ($this->foreign_keys as $i => $v) {
         $end = ($v == end($this->foreign_keys)) ? "" : ",";
         $q = $q . $v . $end;
@@ -662,15 +540,18 @@ class Table
 
     $query = "CREATE TABLE " . $this->name . " ($q)";
 
+    echo $query . "\n\n\n";
+
     try {
       if ($this->conn) {
-        return $this->conn->exec($query) === false;
+        $created = $this->conn->exec($query);
+        return $created === 0;
       } else {
         return false;
       }
     } catch (Exception $e) {
       if ($this->is_debug_mode_on) {
-        echo $e;
+        echo $e->getMessage();
       }
       return false;
     }
