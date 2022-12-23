@@ -540,8 +540,6 @@ class Table
 
     $query = "CREATE TABLE " . $this->name . " ($q)";
 
-    echo $query . "\n\n\n";
-
     try {
       if ($this->conn) {
         $created = $this->conn->exec($query);
