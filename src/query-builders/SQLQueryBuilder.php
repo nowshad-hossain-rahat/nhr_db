@@ -55,10 +55,6 @@ class SQLQueryBuilder
 
     if ($column_name && $operator && $value !== null) {
 
-      if (gettype($value) === 'string') {
-        $value = "'$value'";
-      }
-
       $this->conditions_sql_str .= trim($column_name) . ":" . trim($column_name) . $this->condition_postfix;
       $this->pdo_condition_parameters[":" . trim($column_name) . $this->condition_postfix] = " " . trim($operator) . " $value";
 
@@ -88,10 +84,6 @@ class SQLQueryBuilder
     }
 
     if ($column_name && $operator && $value !== null) {
-
-      if (gettype($value) === 'string') {
-        $value = "'$value'";
-      }
 
       $this->conditions_sql_str .= trim($column_name) . ":" . trim($column_name) . $this->condition_postfix;
       $this->pdo_condition_parameters[":" . trim($column_name) . $this->condition_postfix] = " " . trim($operator) . " $value";

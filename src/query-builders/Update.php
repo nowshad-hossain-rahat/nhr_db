@@ -37,7 +37,7 @@ class Update extends SQLQueryBuilder
     }, array_keys($columns_and_values)));
 
     foreach ($columns_and_values as $col => $val) {
-      $this->pdo_update_parameters[":" . $col . $this->value_postfix] = ((gettype($val) === 'string') ? "'$val'" : $val);
+      $this->pdo_update_parameters[":" . $col . $this->value_postfix] = ((gettype($val) === 'string') ? "$val" : $val);
     }
 
     $this->sql_query = "UPDATE " . $this->table->get_name() . " SET $update_columns";
